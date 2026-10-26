@@ -2969,7 +2969,7 @@ function makeMockDevice(opt = {}) {
     D("FADE", F.INT, 0, 15, 0),                      /* GLO > MASTER 2 (2.7.2): the punch-in FX fade (punch.c) */
   ];
   /* the drum track's P_E0: its kit (drums.c DRUM_KIT_NAMES; 5 = 808, the power-on kit) */
-  const KIT = E("KIT", ["ACOUSTIC", "DEEP", "TIGHT", "BRIGHT", "DUST", "808", "909", "606", "80S", "VINTAGE", "TRAP", "DRILL", "BOOMBAP", "LO-FI", "PHONK", "HOUSE", "D.HOUSE", "TECHNO", "MINIMAL", "ELECTRO", "DISCO", "GARAGE", "JUNGLE", "DUBSTEP", "DEMBOW", "AMAPIANO", "AFRO", "LATIN", "TRIBAL", "SYNTHWV", "CHIP", "ARCADE", "GLITCH", "INDUSTR", "HYPER", "AMBIENT", "JAZZ", "USR1", "USR2", "USR3", "USR4", "USR3+4", "SYN1", "SYN2", "SYN3", "SYN4"], 0);
+  const KIT = E("KIT", ["HLAH", "HLAH DP", "HLAH TGT", "HLAH BRT", "HLAH DST", "808", "909", "606", "80S", "VINTAGE", "TRAP", "DRILL", "BOOMBAP", "LO-FI", "PHONK", "HOUSE", "D.HOUSE", "TECHNO", "MINIMAL", "ELECTRO", "DISCO", "GARAGE", "JUNGLE", "DUBSTEP", "DEMBOW", "AMAPIANO", "AFRO", "LATIN", "TRIBAL", "SYNTHWV", "CHIP", "ARCADE", "GLITCH", "INDUSTR", "HYPER", "AMBIENT", "JAZZ", "USR1", "USR2", "USR3", "USR4", "USR3+4", "SYN1", "SYN2", "SYN3", "SYN4", "TLIE", "SANC", "ONLY", "DISC", "ECHO", "LETU", "DEMN", "CORO", "999999"], 0);
   /* a GM note -> its drum lane (drums.c LANE_OF_GM: 35..81) */
   const LANE_OF_GM = [1, 0, 7, 2, 3, 8, 9, 4, 9, 6, 9, 5, 10, 10, 11, 10, 12, 11, 12, 13, 11, 15, 11, 13, 12, 14, 14, 14, 14, 14,
     14, 14, 15, 15, 13, 13, 15, 15, 13, 13, 7, 7, 7, 14, 14, 15, 15];
@@ -3033,10 +3033,10 @@ function makeMockDevice(opt = {}) {
         P("8BIT ARP", [2, 0, 96, 0, 0, 0, 2, 110], [0, 60, 80, 40], 0)] },
     { name: "SAMPLE", titles: ["SET", "TONE"], edit: [E("SET", ["PIANO", "BASS", "VIBES", "HORNS", "STRGS", "FLUTE", "SCRCH", "PERC", "USR1", "USR2", "USR3", "USR4"], 0), D("TUNE", F.SEMI, -24, 24, 0), D("BITS", F.INT, 0, 127, 0),
         E("LOOP", NONOFF, 1), D("CUT", F.INT, 0, 127, 127), NONE, D("DRV", F.PCT, 0, 127, 0), NONE],
-      presets: [P("DUSTY PNO", [0, 0, 20, 1, 104, 0, 14, 0], [0, 127, 127, 52], 0), P("UP BASS", [1, 0, 0, 1, 118, 0, 12, 0], [0, 127, 127, 26], 1),
-        P("VIBES", [2, 0, 0, 1, 127, 0, 0, 0], [0, 127, 127, 72], 0), P("HORN STAB", [3, 0, 0, 1, 120, 0, 20, 0], [0, 127, 127, 22], 0),
-        P("STRING STB", [4, 0, 0, 1, 122, 0, 10, 0], [0, 127, 127, 26], 0), P("LOFI FLUTE", [5, 0, 12, 1, 100, 0, 0, 0], [12, 80, 120, 60], 1),
-        P("SCRATCH", [6, 0, 0, 1, 127, 0, 8, 0], [0, 127, 127, 18], 0), P("GM KIT", [7, 0, 0, 0, 127, 0, 0, 0], [0, 127, 127, 60], 0),
+      presets: [P("DUSTY PNO", [0, 0, 20, 1, 104, 0, 14, 0], [0, 127, 127, 52], 0), P("ECHO BASS", [1, 0, 0, 1, 118, 0, 12, 0], [0, 127, 127, 26], 1),
+        P("DISC MRMBA", [2, 0, 0, 1, 127, 0, 0, 0], [0, 127, 127, 72], 0), P("LETU STAB", [3, 0, 0, 1, 120, 0, 20, 0], [0, 127, 127, 22], 0),
+        P("DEMN STRGS", [4, 0, 0, 1, 122, 0, 10, 0], [0, 127, 127, 26], 0), P("CORO DRONE", [5, 0, 12, 1, 100, 0, 0, 0], [12, 80, 120, 60], 1),
+        P("HLAH BASS", [6, 0, 0, 1, 127, 0, 8, 0], [0, 127, 127, 18], 0), P("HLAH KIT", [7, 0, 0, 0, 127, 0, 0, 0], [0, 127, 127, 60], 0),
         P("LOFI KEYS", [0, 0, 45, 1, 78, 0, 30, 0], [0, 127, 110, 60], 0), P("DEEP BASS", [1, -12, 0, 1, 90, 0, 40, 0], [0, 127, 127, 30], 1)] },
     { name: "VOICE", titles: ["VOWL", "TONE"], edit: [D("VOWL", F.INT, 0, 127, 0), D("VOWL2", F.INT, 0, 127, 64), D("TALK", F.TIME, 0, 127, 0),
         D("SHIFT", F.SEMI, -12, 12, 0), D("BUZZ", F.PCT, 0, 127, 64), D("BRTH", F.PCT, 0, 127, 10), D("Q", F.PCT, 0, 127, 64), D("RAND", F.PCT, 0, 127, 0)],

@@ -25,13 +25,23 @@
 #define DRUM_USR (DRUM_SAMPLED + DS_NKITS)
 #define DRUM_PAIR (DRUM_USR + SMP_USER_SLOTS)   /* USR3+4: one kit in two slots (the editor splits it), ~15 s */
 #define DRUM_SYN (DRUM_PAIR + 1u)                /* SLOOP 2.5: SYN1..SYN4, your synthesised kits (drum_synth.c dsu) */
-#define DRUM_KITS (DRUM_SYN + DSU_N)
-static const char *const DRUM_KIT_NAMES[] = {"ACOUSTIC", "DEEP", "TIGHT", "BRIGHT", "DUST", DS_KIT_NAME_LIST,
+/* NIN-VAVE: the GM sample kit ("PERC") is Head Like a Hole's (tools/nin_kits.py), its four treatments too; after
+ * SYN4 a sampled kit for each other song, its set NIN_KIT_SETS[k] (gen_samples.py: GM-mapped as PERC). Appended:
+ * the kit numbers of SLOOP's projects stay */
+#define DRUM_NIN (DRUM_SYN + DSU_N)
+#define NIN_NKITS 9u
+static const char *const NIN_KIT_SETS[NIN_NKITS] = {"TLIE", "SANC", "ONLY", "DISC", "ECHO", "LETU", "DEMN", "CORO", "9999"};
+#define DRUM_KITS (DRUM_NIN + NIN_NKITS)
+static const char *const DRUM_KIT_NAMES[] = {"HLAH", "HLAH DP", "HLAH TGT", "HLAH BRT", "HLAH DST", DS_KIT_NAME_LIST,
                                              "USR1", "USR2", "USR3", "USR4", "USR3+4",
-                                             "SYN1", "SYN2", "SYN3", "SYN4"};
-static const char *const DRUM_KIT_STYLES[] = {"STUDIO", "SOFT", "PUNCHY", "BRIGHT", "DUSTY", DS_KIT_STYLE_LIST,
+                                             "SYN1", "SYN2", "SYN3", "SYN4",
+                                             "TLIE", "SANC", "ONLY", "DISC", "ECHO", "LETU", "DEMN", "CORO", "999999"};
+static const char *const DRUM_KIT_STYLES[] = {"HEAD HOLE", "HOLE DEEP", "HOLE PUNCH", "HOLE BRIGHT", "HOLE DUSTY",
+                                              DS_KIT_STYLE_LIST,
                                               "YOUR KIT", "YOUR KIT", "YOUR KIT", "YOUR KIT", "BIG KIT",
-                                              "YOUR SYNTH", "YOUR SYNTH", "YOUR SYNTH", "YOUR SYNTH"};
+                                              "YOUR SYNTH", "YOUR SYNTH", "YOUR SYNTH", "YOUR SYNTH",
+                                              "TERRIBLE LIE", "SANCTIFIED", "ONLY TIME", "DISCIPLINE", "ECHOPLEX",
+                                              "LETTING YOU", "DEMON SEED", "CORONA RAD", "999,999"};
 _Static_assert(sizeof(DRUM_KIT_NAMES) / sizeof(DRUM_KIT_NAMES[0]) == DRUM_KITS, "a name per kit");
 static uint32_t drum_kit(void) { return (uint32_t)clamp(TDRUM->p[P_E0], 0, DRUM_KITS - 1); }
 #define DRUM_DEFAULT_KIT DRUM_SAMPLED   /* power-on: 808 */
@@ -63,6 +73,23 @@ static int32_t mix_glide(int32_t from, int32_t to)
 {
     int32_t d = to - from;
     return d <= 8 && d >= -8 ? to : from + d / 4;
+}
+
+/* NIN-VAVE: the set of kit DRUM_NIN + k (NIN_SETS), 0 = none. Found by name once, and out of line: drum_on runs in
+ * the audio interrupt, it gains a branch and a call, not the search */
+__attribute__((noinline)) static const smp_set_t *nin_set(uint32_t k)
+{
+    static const smp_set_t *at[NIN_NKITS];
+    static uint8_t found;
+    uint32_t i, j;
+    if (!found) {
+        found = 1;
+        for (j = 0; j < NIN_NKITS; j++)
+            for (i = 0; i < NIN_NSETS; i++)
+                if (str_eq(NIN_SETS[i].name, NIN_KIT_SETS[j]))
+                    at[j] = &NIN_SETS[i];
+    }
+    return k < NIN_NKITS ? at[k] : 0;
 }
 
 static int32_t drum_set(void)
@@ -271,21 +298,21 @@ static void drum_audition_poll(void)
 
 static void drum_on(uint32_t note, uint32_t vel)
 {
-    int32_t si = drum_set();
-    const smp_set_t *set;
-    voice_t *v = &drums.v[0];
     uint32_t i, zi = 0xFFFFu, kit = drum_kit();
+    int32_t si = drum_set();
+    const smp_set_t *set = kit >= DRUM_NIN ? nin_set(kit - DRUM_NIN) : si >= 0 ? &SMP_SETS[si] : 0;   /* (NIN: the GM path) */
+    voice_t *v = &drums.v[0];
     int32_t zid = -1;
     if (note != 76u && note != 77u)                 /* the pads and key LEDs (not the click's wood block) */
         drums.hits |= (uint16_t)(1u << lane_of_note(note));
     if (note == 35u || note == 36u)
         drums.kick = 1;                             /* (DUCK) */
-    if (kit >= DRUM_SYN) {                          /* SYN1..SYN4: your synthesised kit */
+    if (kit >= DRUM_NIN) {                          /* NIN-VAVE: a song's sampled kit, as the GM kit */
+    } else if (kit >= DRUM_SYN) {                   /* SYN1..SYN4: your synthesised kit */
         const dsu_kit_t *u = dsu_kit(kit - DRUM_SYN);
         drum_synth_on(note, vel, kit, u->s, u->crush, 1);
         return;
-    }
-    if (kit >= DRUM_USR) {                          /* a user kit: the lane's sound, as its note (the hat choke) */
+    } else if (kit >= DRUM_USR) {                   /* a user kit: the lane's sound, as its note (the hat choke) */
         if (note == 76u || note == 77u)
             return;                                 /* (the click's wood block: not a lane) */
         note = LANE_NOTE[lane_of_note(note)];
@@ -302,10 +329,9 @@ static void drum_on(uint32_t note, uint32_t vel)
         drum_synth_on(note, vel, kit, DS_KITS[kit - DRUM_SAMPLED].s, DS_KITS[kit - DRUM_SAMPLED].crush, 1);
         return;
     }
-    if (zid < 0) {                                  /* the GM sample kit */
-        if (si < 0)
+    if (zid < 0) {                                  /* the GM sample kit (or a NIN kit) */
+        if (!set)
             return;
-        set = &SMP_SETS[si];
         for (i = 0; i < set->nz; i++)
             if (note >= SMP_ZONES[set->z0 + i].lo && note <= SMP_ZONES[set->z0 + i].hi)
                 zi = set->z0 + i;
