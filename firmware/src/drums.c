@@ -43,8 +43,22 @@ static const char *const DRUM_KIT_STYLES[] = {"HEAD HOLE", "HOLE DEEP", "HOLE PU
                                               "TERRIBLE LIE", "SANCTIFIED", "ONLY TIME", "DISCIPLINE", "ECHOPLEX",
                                               "LETTING YOU", "DEMON SEED", "CORONA RAD", "999,999"};
 _Static_assert(sizeof(DRUM_KIT_NAMES) / sizeof(DRUM_KIT_NAMES[0]) == DRUM_KITS, "a name per kit");
+/* NIN-VAVE: the order PRESETS steps the kits in: HLAH, the songs' kits, HLAH's treatments, then SLOOP's (808 ..
+ * SYN4). The kit numbers stay (projects, Program Change, the editor): only the knob's way through them changes */
+static uint32_t kit_pos(uint32_t kit)
+{
+    return kit == 0u ? 0u : kit >= DRUM_NIN ? 1u + (kit - DRUM_NIN) : NIN_NKITS + kit;   /* (1..: after the songs) */
+}
+static uint32_t kit_at(uint32_t pos)
+{
+    return pos == 0u ? 0u : pos <= NIN_NKITS ? DRUM_NIN + pos - 1u : pos - NIN_NKITS;
+}
+static int16_t kit_step(int32_t kit, int32_t s)    /* the kit s detents on from kit (stops at the ends) */
+{
+    return (int16_t)kit_at((uint32_t)clamp((int32_t)kit_pos((uint32_t)clamp(kit, 0, DRUM_KITS - 1)) + s, 0, DRUM_KITS - 1));
+}
 static uint32_t drum_kit(void) { return (uint32_t)clamp(TDRUM->p[P_E0], 0, DRUM_KITS - 1); }
-#define DRUM_DEFAULT_KIT DRUM_SAMPLED   /* power-on: 808 */
+#define DRUM_DEFAULT_KIT 0u             /* power-on: HLAH (NIN-VAVE; SLOOP: the 808) */
 
 static struct {
     voice_t v[NDRUM];

@@ -176,10 +176,11 @@ UI_SMALL static void felucca_init(void)
         }
         track_defaults_steps(t);              /* the sequencers start empty */
     }
-    TDRUM->p[P_E0] = DRUM_DEFAULT_KIT;        /* the 808 kit */
+    TDRUM->p[P_E0] = DRUM_DEFAULT_KIT;        /* NIN-VAVE: the HLAH kit */
     song.sel = 0;
     song.master_q12 = 2048;
     autosave_resume();                        /* the project as it was left (project.c) */
+    nin_boot();                               /* NIN-VAVE: its first power-on: HLAH A, the NIN favourites (nin_pat.c) */
     song.g[G_SYNC] = (int16_t)lights_sync;    /* a setting of the FM-1 (panel.c) */
     song.g[G_MIDI] = (int16_t)lights_mout;
     song.g[G_ROUTE] = (int16_t)lights_min;

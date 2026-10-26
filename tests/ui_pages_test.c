@@ -144,10 +144,55 @@ static void check(int ok, const char *what) { printf("ui: %-74s %s\n", what, ok 
 static const char *sub_line(void) { return layer_sub_shown; }   /* the layer's sub line as last drawn (ui_layers.c) */
 
 #ifndef UI_PAGES_HARNESS_ONLY                       /* (tests/stress_test.c: the harness, its own main) */
+/* NIN-VAVE (nin_pat.c, drums.c kit_step): its first power-on loads HLAH A and puts the NIN sounds first among the
+ * favourites, keeping the user's after them; the next power-on changes nothing; PRESETS on the drum track goes
+ * HLAH, the songs' kits, HLAH's treatments, then SLOOP's; every factory pattern loads */
+static void t_nin(void)
+{
+    uint32_t i, ok = 1, b[FAV_N], n, lanes = 0, bass = 0;
+    uint16_t before[FAV_N];
+    host_tracks_init();
+    for (i = 0; i < FAV_N; i++) fav[i] = FAV_NONE;
+    fav[0] = 0;                                         /* a favourite of the user's (BANK 0) */
+    TDRUM->p[P_E0] = (int16_t)DRUM_SAMPLED;             /* as SLOOP left it: the 808 */
+    nin_boot();
+    n = fav_list(b);
+    check(n == NIN_NFAV + 1u && !strcmp(BANK[b[0]].name, "HLAH BASS") && !strcmp(BANK[b[NIN_NFAV - 1u]].name, "HLAH KIT") &&
+          b[NIN_NFAV] == 0u, "NIN-VAVE first power-on: the NIN sounds first among the favourites, the user's after");
+    for (i = 0; i < 16u; i++) lanes |= TDRUM->dstep[i].on[0] | TDRUM->dstep[i].on[1] << 8;
+    for (i = 0; i < 16u; i++) bass += trk[0].step[i].n;
+    check(TDRUM->p[P_E0] == 0 && lanes && bass && song.g[G_BPM] == 115 && TDRUM->p[P_SLEN] == 16 &&
+          !strcmp(ENGINES[trk[1].eng_req]->name, "SAMPLE") && !trk[1].step[0].n,
+          "NIN-VAVE first power-on: HLAH A (the HLAH kit, drums, bass on track 1, 115 BPM), tracks 2, 3 a NIN sound");
+    memcpy(before, fav, sizeof before);
+    TDRUM->p[P_E0] = (int16_t)DRUM_SAMPLED;
+    nin_boot();
+    check(!memcmp(before, fav, sizeof before) && TDRUM->p[P_E0] == (int16_t)DRUM_SAMPLED,
+          "NIN-VAVE later power-ons: nothing changes (the autosave as it was)");
+    check(kit_step(0, 1) == (int16_t)DRUM_NIN && kit_step(DRUM_NIN + NIN_NKITS - 1u, 1) == 1 &&
+          kit_step(4, 1) == (int16_t)DRUM_SAMPLED && kit_step(DRUM_NIN - 1u, 1) == (int16_t)(DRUM_NIN - 1u) &&
+          kit_step(0, -1) == 0 && kit_step(DRUM_SAMPLED, -1) == 4, "NIN-VAVE PRESETS on the drum track: HLAH, the songs, HLAH's treatments, SLOOP's");
+    for (i = 0; i < DRUM_KITS; i++) ok &= kit_at(kit_pos(i)) == i;
+    check(ok, "NIN-VAVE kit order: every kit once");
+    for (ok = 1, i = 0; i < NIN_NPAT; i++) {
+        nin_pattern_load(i);
+        ok &= TDRUM->p[P_SLEN] == NIN_PAT[i].steps && (uint32_t)TDRUM->p[P_E0] < DRUM_KITS;
+    }
+    check(ok && NIN_NPAT >= 20u, "NIN-VAVE: every factory pattern loads (its kit, its length)");
+    for (i = 0; i < FAV_N; i++) fav[i] = FAV_NONE;      /* (the tests after these start as SLOOP's did) */
+    host_tracks_init();
+    for (i = 0; i < NPART; i++) {
+        set_engine_of(&trk[i], trk_def_engine(i));
+        trk[i].engine = trk[i].eng_req;
+    }
+    song.sel = 0;
+}
+
 int main(int argc, char **argv)
 {
     uint32_t i;
     outdir = argc > 1 ? argv[1] : "build/host";
+    t_nin();
     {   /* the preset list by kind (ui.c BANK): every factory preset of every engine once, every name found */
         uint32_t e, k, n, hits;
         bank_resolve();

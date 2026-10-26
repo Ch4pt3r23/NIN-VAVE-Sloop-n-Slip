@@ -10,6 +10,18 @@ out on purpose: patterns to start from.
 
 > **Status: 1.0 (dev).** Builds on SLOOP 2.8.1 and passes its host tests; not yet run on an FM-1.
 
+## It boots as NIN-VAVE
+
+- The boot screen says **NIN-VAVE / SLOOP N' SLIP**.
+- **The first power-on** (coming from SLOOP, or a fresh FM-1) loads **HLAH A**: the Head Like a Hole kit and drums,
+  its bass line on track 1 (HLAH BASS), **LETU STAB** on track 2 and **DISC PIANO** on track 3, empty to play over,
+  at 115 BPM, the drum track selected. Press **PLAY**.
+- The NIN sounds become your first **favourites**, so **PRESETS** lists them first on every synth track (your own
+  favourites stay, after them). On the drum track, PRESETS goes **HLAH, TLIE, SANC, ONLY, DISC, ECHO, LETU, DEMN,
+  CORO, 999999**, then HLAH's treatments, then SLOOP's kits (808 ... SYN4).
+- After that it resumes what you left, as SLOOP does. A **NEW** project starts on the NIN sounds and the HLAH kit.
+- (Remove every NIN sound from your favourites and the next power-on is a "first" one again.)
+
 ## What's NIN in it
 
 **Ten drum kits**, one per song: the drum track's **KIT** (PRESETS on the drum track).
@@ -29,7 +41,7 @@ out on purpose: patterns to start from.
 
 Each kit has the song's kick (and a lower KICK 2), snare, a second snare or the clap, closed and open hats, two
 percussion hits on the rim, conga and tom lanes, and the song's noise on ride and cowbell. SLOOP's synthesised kits
-(808, 909, INDUSTR ...) and your USR / SYN kits are all still there, between HLAH DST and TLIE.
+(808, 909, INDUSTR ...) and your USR / SYN kits are all still there, after the NIN ones on PRESETS.
 
 **NIN sounds** on the synth tracks (PRESETS, SAMPLE engine), played in tune across the keys:
 

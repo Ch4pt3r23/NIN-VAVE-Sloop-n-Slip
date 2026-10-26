@@ -48,3 +48,50 @@ UI_SMALL static void nin_pattern_load(uint32_t i)
     song.g[G_BPM] = (int16_t)clamp(((int32_t)p->bpm10 + 5) / 10, 40, 240);
     ui.force = 1;
 }
+
+/* NIN-VAVE boots as itself. Its first power-on (no NIN sound among the favourites: coming from SLOOP, or a fresh
+ * FM-1): the NIN sounds become the first favourites (PRESETS lists them first; the user's own after them, 16 in
+ * all), and HLAH A plays on the HLAH kit with LETU STAB and DISC PIANO on tracks 2 and 3, empty, to play over.
+ * The favourites are saved with the settings at once, so later power-ons resume the autosave as SLOOP does */
+static const char *const NIN_FAVS[] = {"HLAH BASS", "ECHO BASS", "DISC PIANO", "LETU STAB", "DEMN STRGS",
+                                       "CORO DRONE", "DISC MRMBA", "HLAH KIT"};
+#define NIN_NFAV (sizeof NIN_FAVS / sizeof NIN_FAVS[0])
+
+UI_SMALL static uint32_t nin_bank(const char *name)   /* the BANK index of a factory sound, NBANK = none */
+{
+    uint32_t i;
+    for (i = 0; i < NBANK; i++)
+        if (str_eq(BANK[i].name, name))
+            return i;
+    return NBANK;
+}
+
+UI_SMALL static void nin_boot(void)
+{
+    uint16_t keep[FAV_N];
+    uint32_t i, k, n = 0;
+    if (!bank_ready)
+        bank_resolve();
+    for (i = 0; i < NIN_NFAV; i++)
+        if (fav_has(nin_bank(NIN_FAVS[i])))
+            return;                                  /* been here before */
+    memcpy(keep, fav, sizeof keep);
+    for (i = 0; i < NIN_NFAV; i++)
+        if ((k = nin_bank(NIN_FAVS[i])) < NBANK)
+            fav[n++] = (uint16_t)k;
+    for (i = 0; i < FAV_N && n < FAV_N; i++)         /* the user's favourites after them */
+        if (keep[i] != FAV_NONE)
+            fav[n++] = keep[i];
+    while (n < FAV_N)
+        fav[n++] = FAV_NONE;
+    fav_dirty = 1;
+    nin_pattern_load(0);                             /* HLAH A: the kit, the drums, the bass on track 1 */
+    for (i = 1; i < NPART; i++) {                    /* tracks 2, 3: a NIN sound, nothing programmed */
+        preset_go_to(&trk[i], nin_bank(i == 1u ? "LETU STAB" : "DISC PIANO"));
+        track_defaults_steps(&trk[i]);
+    }
+    for (i = 0; i < NPART; i++)
+        trk[i].engine = trk[i].eng_req;              /* (power-on: nothing sounds, no fade) */
+    song.sel = TRK_DRUM;
+    settings_save();                                 /* the favourites now (once): a power-off may come next */
+}

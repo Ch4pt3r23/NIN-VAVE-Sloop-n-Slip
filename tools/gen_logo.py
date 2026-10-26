@@ -183,11 +183,37 @@ def rgb565(c):
     return ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3)
 
 
+NIN_RED = (224, 32, 32)
+
+
+def nin_splash():
+    """NIN-VAVE's boot splash: the name in Terminus Bold (the UI's font, assets/fonts), blown up to hard pixels, a red
+    bar, SLOOP N' SLIP under it. Plain type: nothing of the band's own logo"""
+    import tempfile
+    from PIL import BdfFontFile, ImageFont
+    root = Path(__file__).resolve().parents[1]
+    with tempfile.TemporaryDirectory() as tmp, open(root / "assets/fonts/ter-u16b.bdf", "rb") as fp:
+        BdfFontFile.BdfFontFile(fp).save(str(Path(tmp) / "ter"))
+        font = ImageFont.load(str(Path(tmp) / "ter.pil"))
+
+        def word(text, scale, col):
+            im = Image.new("RGB", (8 * len(text), 16), BLACK)
+            ImageDraw.Draw(im).text((0, 0), text, font=font, fill=col)
+            return im.resize((im.width * scale, im.height * scale), Image.NEAREST)
+        big, small = word("NIN-VAVE", 3, WHITE), word("SLOOP N' SLIP", 2, NIN_RED)
+    im = Image.new("RGB", (SPLASH_W, SPLASH_H), BLACK)
+    im.paste(big, ((SPLASH_W - big.width) // 2, 34))
+    ImageDraw.Draw(im).rectangle(((SPLASH_W - 196) // 2, 96, (SPLASH_W + 196) // 2 - 1, 101), fill=NIN_RED)
+    im.paste(small, ((SPLASH_W - small.width) // 2, 116))
+    return im
+
+
 def splash_header(path):
-    im = render("v", SPLASH_W, SPLASH_H, SPLASH_K)
-    # a fixed palette: black, and each logo colour at 1/3, 2/3 and full (the anti-aliased edges)
+    im = nin_splash()                                 # NIN-VAVE (SLOOP's own: render("v", ...), --assets)
+    # a fixed palette: black, and each logo colour at 1/3, 2/3 and full (the anti-aliased edges); NIN-VAVE: its red
+    # in the orange's place
     cols = [BLACK]
-    for c in (WHITE, BLUE, GREEN, YELLOW, ORANGE):
+    for c in (WHITE, BLUE, GREEN, YELLOW, NIN_RED):
         cols += [tuple(round(v * f) for v in c) for f in (1 / 3, 2 / 3, 1.0)]
     src = im.tobytes()
     px = []
