@@ -11,7 +11,7 @@ UI_SMALL static void nin_pattern_load(uint32_t i)
 {
     const nin_pat_t *p = &NIN_PAT[i % NIN_NPAT];
     track_t *d = TDRUM, *b = &trk[0];
-    const char *bass = p->song < 4u ? "HLAH BASS" : "ECHO BASS";   /* (Pretty Hate Machine, The Slip) */
+    const char *bass = p->song < 4u ? "NIN.HLAH BASS" : "NIN.ECHO BASS";   /* (Pretty Hate Machine, The Slip) */
     uint32_t s, l, n = p->steps < NSTEP ? p->steps : NSTEP;
     d->p[P_E0] = (int16_t)(p->song ? DRUM_NIN + p->song - 1u : 0u);  /* HLAH: the GM kit (PERC) */
     memset(d->dstep, 0, sizeof d->dstep);
@@ -53,8 +53,8 @@ UI_SMALL static void nin_pattern_load(uint32_t i)
  * FM-1): the NIN sounds become the first favourites (PRESETS lists them first; the user's own after them, 16 in
  * all), and HLAH A plays on the HLAH kit with LETU STAB and DISC PIANO on tracks 2 and 3, empty, to play over.
  * The favourites are saved with the settings at once, so later power-ons resume the autosave as SLOOP does */
-static const char *const NIN_FAVS[] = {"HLAH BASS", "ECHO BASS", "DISC PIANO", "LETU STAB", "DEMN STRGS",
-                                       "CORO DRONE", "DISC MRMBA", "HLAH KIT"};
+static const char *const NIN_FAVS[] = {"NIN.HLAH BASS", "NIN.ECHO BASS", "NIN.DISC PIANO", "NIN.LETU STAB", "NIN.DEMN STRGS",
+                                       "NIN.CORO DRONE", "NIN.DISC MRMBA", "NIN.HLAH KIT"};
 #define NIN_NFAV (sizeof NIN_FAVS / sizeof NIN_FAVS[0])
 
 UI_SMALL static uint32_t nin_bank(const char *name)   /* the BANK index of a factory sound, NBANK = none */
@@ -87,7 +87,7 @@ UI_SMALL static void nin_boot(void)
     fav_dirty = 1;
     nin_pattern_load(0);                             /* HLAH A: the kit, the drums, the bass on track 1 */
     for (i = 1; i < NPART; i++) {                    /* tracks 2, 3: a NIN sound, nothing programmed */
-        preset_go_to(&trk[i], nin_bank(i == 1u ? "LETU STAB" : "DISC PIANO"));
+        preset_go_to(&trk[i], nin_bank(i == 1u ? "NIN.LETU STAB" : "NIN.DISC PIANO"));
         track_defaults_steps(&trk[i]);
     }
     for (i = 0; i < NPART; i++)

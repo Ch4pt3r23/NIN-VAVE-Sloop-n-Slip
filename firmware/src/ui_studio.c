@@ -388,7 +388,7 @@ UI_SMALL static void drum_screen_draw(void)
         title_sig = sig;
         cv_begin(240, 44, C_BLACK);
         cv_rect(2, 4, 34, 34, TE_DRUM);
-        fmt_int(b, (int32_t)kit + 1);
+        fmt_int(b, (int32_t)(kit_pos(kit) < KIT_SHOWN ? kit_pos(kit) : kit) + 1);   /* (NIN-VAVE: its place on the knob) */
         cv_text(19 - text_w(&FONT_S, b) / 2, 13, &FONT_S, b, C_BLACK);
         cv_text(44, 6, &FONT_L, DRUM_KIT_NAMES[kit], C_WHITE);
         cv_text(194, 1, &FONT_S, "grid", drum_page == 0 ? C_WHITE : TE_G3);
@@ -498,7 +498,7 @@ UI_SMALL static void drum_screen_draw(void)
             fmt_int(v[1], song.g[G_DRLVL] * 100 / 127);
             fmt_int(v[2], song.g[G_DRREV] * 100 / 127);
             fmt_int(v[3], TDRUM->p[P_PAN]);
-            ratio[0] = (int32_t)kit_pos(kit) * 1000 / (int32_t)(DRUM_KITS - 1u);
+            ratio[0] = (int32_t)(kit_pos(kit) < KIT_SHOWN ? kit_pos(kit) : 0u) * 1000 / (int32_t)(KIT_SHOWN - 1u);
             ratio[1] = song.g[G_DRLVL] * 1000 / 127;
             ratio[2] = song.g[G_DRREV] * 1000 / 127;
             ratio[3] = (TDRUM->p[P_PAN] + 64) * 1000 / 127;

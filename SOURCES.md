@@ -36,6 +36,23 @@ on any of the pages above (checked 2026-10-26).
 Tempos, time signatures and the section names of the patterns (V1, CH1, RIFF ...) come from each multitrack's
 "Markers and Tempo" MIDI file. The grid's start is measured from the drums.
 
+## NIN-VAVE 1.1: The Downward Spiral, With Teeth, Year Zero
+
+From nindestruct.com's remix page (kept on the maintainer's NAS: `NIN-Multitracks/nindestruct`), as it describes them:
+
+| Song | Album | Multitrack (nindestruct.com) | Kit, patterns, pack from |
+| --- | --- | --- | --- |
+| Closer | The Downward Spiral (1994) | `Multitrack.Closer.zip`, ripped from Rock Band 3 | drums_1 (kick), drums_2 (snare), drums_3 (cymbals), song, rhythm (bass) |
+| March of the Pigs | The Downward Spiral | `Multitrack.MOTP.zip`, ripped from Rock Band | drums, bg sounds, bass synth |
+| The Hand That Feeds | With Teeth (2005) | `Multitrack.THTF.zip`: the multitrack NIN released as a GarageBand session in 2005 | Drum comp, Synthetic Perc, Percussion, Bass |
+| Survivalism | Year Zero (2007) | `Multitrack.Survivalism.zip`, "Sourced from Y34RZ3R0R3M1X3D" (Year Zero Remixed's multitracks) | Drm, Noiz+Nord Perc, Bass |
+
+Their tempos have no markers file: Closer's comes from its kick and snare, the others' from the tempo near a first
+estimate where the drums sit tightest on the 16th grid (The Hand That Feeds 128.0, Survivalism 130.0).
+
+The NIN packs (`tools/nin_pack.py`, built into `build/nin/packs/`, not checked in) cut their kits and instruments
+from the same multitracks.
+
 ## Pretty Hate Machine (1989), ripped from Rock Band 3
 
 | Song | Multitrack | Kit and patterns from |

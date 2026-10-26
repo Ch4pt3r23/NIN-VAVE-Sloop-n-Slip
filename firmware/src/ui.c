@@ -665,9 +665,28 @@ UI_SMALL static void select_engine(uint32_t e)
 /* the factory presets as one list by kind (basses, keys, organs, pads, leads, plucks and bells, stabs,
  * the rest), then the used user presets: the PRESETS knob and the PRESETS page browse it. By name: an
  * engine's preset table may change order; tests/ui_pages_test.c checks every preset is here once */
-enum { BK_BASS, BK_KEYS, BK_ORGAN, BK_PAD, BK_LEAD, BK_PLUCK, BK_STAB, BK_FX };
-static const char *const BANK_KIND[] = {"BASS", "KEYS", "ORGN", "PAD", "LEAD", "PLCK", "STAB", "FX"};
+enum { BK_BASS, BK_KEYS, BK_ORGAN, BK_PAD, BK_LEAD, BK_PLUCK, BK_STAB, BK_FX, BK_NIN };
+static const char *const BANK_KIND[] = {"BASS", "KEYS", "ORGN", "PAD", "LEAD", "PLCK", "STAB", "FX", "NIN"};
+/* NIN-VAVE: the NIN sounds first (kind NIN), then a few of SLOOP's: the 808, the acid, the studio of the 90s (a DX
+ * piano, a string machine, metal and noise). SLOOP's other presets stay in the engines (old projects load them) but
+ * off the PRESETS knob: SLOOP_BANK below keeps their list, unused, for a build that wants them back */
+#define NIN_BANK \
+    {BK_NIN, 4, "NIN.HLAH BASS"}, {BK_NIN, 4, "NIN.HLAH FUZZ"}, {BK_NIN, 4, "NIN.HLAH SUB"}, \
+    {BK_NIN, 4, "NIN.ECHO BASS"}, {BK_NIN, 4, "NIN.ECHO SUB"}, {BK_NIN, 4, "NIN.ECHO FUZZ"}, \
+    {BK_NIN, 4, "NIN.DISC PIANO"}, {BK_NIN, 4, "NIN.PIANO RUST"}, {BK_NIN, 4, "NIN.PIANO DARK"}, \
+    {BK_NIN, 4, "NIN.LETU STAB"}, {BK_NIN, 4, "NIN.STAB DIRT"}, {BK_NIN, 4, "NIN.STAB OCT"}, \
+    {BK_NIN, 4, "NIN.DEMN STRGS"}, {BK_NIN, 4, "NIN.STRGS SLOW"}, {BK_NIN, 4, "NIN.STRGS BURN"}, \
+    {BK_NIN, 4, "NIN.DISC MRMBA"}, {BK_NIN, 4, "NIN.MRMBA CRUSH"}, {BK_NIN, 4, "NIN.MRMBA ECHO"}, \
+    {BK_NIN, 4, "NIN.CORO DRONE"}, {BK_NIN, 4, "NIN.DRONE DARK"}, {BK_NIN, 4, "NIN.DRONE GRIT"}, \
+    {BK_NIN, 4, "NIN.HLAH KIT"}
 static const struct { uint8_t kind, e; const char *name; } BANK[] = {
+    NIN_BANK,
+    {BK_BASS, 0, "808 BOOM"}, {BK_BASS, 0, "ACID 303"}, {BK_BASS, 0, "SUB BASS"}, {BK_KEYS, 1, "DX RHODES"},
+    {BK_PAD, 6, "ENSEMBLE"}, {BK_PAD, ENGI_PHYS, "BOWED MTL"}, {BK_FX, ENGI_NOISE, "NZ METAL"},
+    {BK_FX, ENGI_NOISE, "BITCRUSH"},
+};
+#if 0                                                /* SLOOP 2.8.1's list (less its sample presets) */
+static const struct { uint8_t kind, e; const char *name; } SLOOP_BANK[] = {
     {BK_BASS, 0, "808 BOOM"}, {BK_BASS, 0, "808 DIRTY"}, {BK_BASS, 0, "808 SLIDE"}, {BK_BASS, 0, "SUB BASS"},
     {BK_BASS, 0, "PLUGG BASS"}, {BK_BASS, 0, "REESE"}, {BK_BASS, 0, "WOBBLE"}, {BK_BASS, 0, "ACID 303"},
     {BK_BASS, 1, "FM BASS"}, {BK_BASS, 2, "CZ BASS"}, {BK_BASS, 6, "FAT BASS"}, {BK_BASS, 0, "FUNK BASS"},
@@ -718,6 +737,7 @@ static const struct { uint8_t kind, e; const char *name; } BANK[] = {
     {BK_FX, ENGI_SLICE, "USR SLICE"},
 #endif
 };
+#endif
 #define NBANK (sizeof BANK / sizeof BANK[0])
 static uint8_t bank_pi[NBANK];                       /* the preset index of each entry in its engine */
 static uint8_t bank_ready;

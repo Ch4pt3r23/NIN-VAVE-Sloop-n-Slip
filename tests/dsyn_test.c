@@ -135,7 +135,7 @@ int main(void)
     /* NIN-VAVE: the songs' kits come after SYN4 (SLOOP's kit numbers stay) */
     check(DRUM_SYN == DRUM_PAIR + 1u && DRUM_NIN == DRUM_SYN + 4u && !strcmp(DRUM_KIT_NAMES[DRUM_SYN], "SYN1") &&
           !strcmp(DRUM_KIT_NAMES[DRUM_NIN - 1u], "SYN4") && !strcmp(DRUM_KIT_STYLES[DRUM_SYN], "YOUR SYNTH") &&
-          DRUM_KITS == DRUM_NIN + NIN_NKITS && !strcmp(DRUM_KIT_NAMES[DRUM_NIN], "TLIE"),
+          DRUM_KITS == DRUM_NIN + NIN_NKITS && !strcmp(DRUM_KIT_NAMES[DRUM_NIN], "NIN.TLIE"),
           "the kit list: SYN1..SYN4 after USR3+4, then the NIN kits (older projects keep their kit)");
     (void)dsu_kit(0);
     ok = 1;
@@ -268,7 +268,7 @@ int main(void)
     }
     {   /* 2.7, the DRUMS screen's SOUND page: a sound's TUNE and DECAY, on a synthesised kit (808), a sampled one
          * (ACOUSTIC) and SYN1; the editor's audition plays SYN1 as designed */
-        static const char *const KN[3] = {"808", "HLAH", "SYN1"};   /* (NIN-VAVE: the GM kit is HLAH) */
+        static const char *const KN[3] = {"808", "NIN.HLAH", "SYN1"};   /* (NIN-VAVE: the GM kit is HLAH) */
         for (k = 0; k < 3u; k++) {
             uint32_t kit = 0, kk, n0, nu, nd, tuned;
             double z0, zu, zd, t0, ts, tl;

@@ -45,7 +45,7 @@ TR = 22050                                   # stored sample rate
 # DUST); NIN_KITS are sets of their own after every other set (drums.c NIN_KIT_SETS: the same names, the same order)
 NIN = SRC / "assets" / "nin-kits"
 NIN_GM_KIT = "HLAH"
-NIN_KITS = ["TLIE", "SANC", "ONLY", "DISC", "ECHO", "LETU", "DEMN", "CORO", "9999"]
+NIN_KITS = ["TLIE", "SANC", "ONLY", "DISC", "ECHO", "LETU", "DEMN", "CORO", "9999", "CLSR", "MOTP", "THTF", "SURV"]
 
 # set -> kind ("oneshot" decaying, "sus" looped sustain, "piano" its attack then a steady loop that the
 # envelope fades, "kit" one sample per key).
@@ -56,21 +56,34 @@ MEASURED_TUNING = ()                         # sets recorded off A440 (measured 
 
 # the preset of each set: name, {SET (filled in), TUNE, BITS, LOOP (filled in), CUT, -, DRV, -}, env, mono,
 # sends (DIST, CHORUS, DELAY, REVERB), more (track parameter, value) pairs (preset_t.x)
+# NIN-VAVE: every set holds a NIN sound (tools/nin_kits.py), named NIN.<song> <sound>
 SET_PRESETS = {
-    "PIANO": ("DISC PIANO", [0, 0, 0, 0, 127, 0, 0, 0], (0, 110, 0, 58), 0, (0, 6, 8, 24), ()),
-    "BASS": ("ECHO BASS", [0, 0, 0, 0, 118, 0, 12, 0], (0, 127, 127, 26), 1, (0, 0, 0, 4), ()),
-    "VIBES": ("DISC MRMBA", [0, 0, 0, 0, 127, 0, 0, 0], (0, 127, 127, 72), 0, (0, 24, 22, 30), ("P_LD_AMP", 18, "P_LRATE", 86)),
-    "HORNS": ("LETU STAB", [0, 0, 0, 0, 120, 0, 20, 0], (0, 127, 127, 22), 0, (8, 0, 14, 18), ()),
-    "STRGS": ("DEMN STRGS", [0, 0, 0, 0, 122, 0, 10, 0], (0, 127, 127, 26), 0, (0, 10, 12, 24), ()),
-    "FLUTE": ("CORO DRONE", [0, 0, 12, 0, 100, 0, 0, 0], (12, 80, 120, 60), 1, (0, 16, 26, 30), ("P_LD_PIT", 1, "P_LRATE", 89, "P_LFADE", 40)),
-    "SCRCH": ("HLAH BASS", [0, 0, 0, 0, 118, 0, 12, 0], (0, 127, 127, 26), 1, (0, 0, 0, 4), ()),   # (NIN-VAVE: a mono bass)
-    "PERC": ("HLAH KIT", [0, 0, 0, 0, 127, 0, 0, 0], (0, 127, 127, 60), 0, (0, 0, 0, 6), ()),
+    "PIANO": ("NIN.DISC PIANO", [0, 0, 0, 0, 127, 0, 0, 0], (0, 110, 0, 58), 0, (0, 6, 8, 24), ()),
+    "BASS": ("NIN.ECHO BASS", [0, 0, 0, 0, 118, 0, 12, 0], (0, 127, 127, 26), 1, (0, 0, 0, 4), ()),
+    "VIBES": ("NIN.DISC MRMBA", [0, 0, 0, 0, 127, 0, 0, 0], (0, 127, 127, 72), 0, (0, 24, 22, 30), ("P_LD_AMP", 18, "P_LRATE", 86)),
+    "HORNS": ("NIN.LETU STAB", [0, 0, 0, 0, 120, 0, 20, 0], (0, 127, 127, 22), 0, (8, 0, 14, 18), ()),
+    "STRGS": ("NIN.DEMN STRGS", [0, 0, 0, 0, 122, 0, 10, 0], (0, 127, 127, 26), 0, (0, 10, 12, 24), ()),
+    "FLUTE": ("NIN.CORO DRONE", [0, 0, 12, 0, 100, 0, 0, 0], (12, 80, 120, 60), 1, (0, 16, 26, 30), ("P_LD_PIT", 1, "P_LRATE", 89, "P_LFADE", 40)),
+    "SCRCH": ("NIN.HLAH BASS", [0, 0, 0, 0, 118, 0, 12, 0], (0, 127, 127, 26), 1, (0, 0, 0, 4), ()),
+    "PERC": ("NIN.HLAH KIT", [0, 0, 0, 0, 127, 0, 0, 0], (0, 127, 127, 60), 0, (0, 0, 0, 6), ()),
 }
-# more presets on a set: (set, name, E[], env, mono, sends, more)
+# more presets on a set: (set, name, E[], env, mono, sends, more). NIN-VAVE: each NIN sound twice more, treated by the
+# SAMPLE engine itself (TUNE, BITS, CUT, DRV, the envelope, the sends): the same NIN audio, bent
 EXTRA_PRESETS = [
-    ("PIANO", "DUSTY PNO", [0, 0, 34, 0, 96, 0, 24, 0], (0, 98, 0, 52), 0, (0, 8, 10, 22), ()),
-    ("PIANO", "LOFI KEYS", [0, 0, 45, 0, 78, 0, 30, 0], (0, 108, 0, 60), 0, (0, 30, 18, 34), ("P_LD_PIT", 1, "P_LRATE", 38)),
-    ("BASS", "DEEP BASS", [0, -12, 0, 0, 90, 0, 40, 0], (0, 127, 127, 30), 1, (0, 0, 0, 0), ()),
+    ("PIANO", "NIN.PIANO RUST", [0, 0, 40, 0, 92, 0, 30, 0], (0, 100, 0, 50), 0, (10, 0, 12, 20), ()),
+    ("PIANO", "NIN.PIANO DARK", [0, -12, 0, 0, 56, 0, 0, 0], (0, 120, 40, 90), 0, (0, 14, 30, 70), ()),
+    ("BASS", "NIN.ECHO SUB", [0, -12, 0, 0, 80, 0, 20, 0], (0, 127, 127, 30), 1, (0, 0, 0, 0), ()),
+    ("BASS", "NIN.ECHO FUZZ", [0, 0, 20, 0, 110, 0, 80, 0], (0, 127, 127, 26), 1, (40, 0, 0, 6), ()),
+    ("VIBES", "NIN.MRMBA CRUSH", [0, 0, 56, 0, 120, 0, 20, 0], (0, 110, 60, 50), 0, (0, 0, 20, 20), ()),
+    ("VIBES", "NIN.MRMBA ECHO", [0, -12, 0, 0, 100, 0, 0, 0], (0, 127, 127, 60), 0, (0, 20, 70, 40), ()),
+    ("HORNS", "NIN.STAB DIRT", [0, 0, 24, 0, 110, 0, 70, 0], (0, 127, 127, 22), 0, (40, 0, 10, 14), ()),
+    ("HORNS", "NIN.STAB OCT", [0, -12, 0, 0, 100, 0, 20, 0], (0, 127, 127, 30), 0, (8, 10, 20, 24), ()),
+    ("STRGS", "NIN.STRGS SLOW", [0, 0, 0, 0, 100, 0, 0, 0], (40, 110, 110, 90), 0, (0, 20, 20, 70), ()),
+    ("STRGS", "NIN.STRGS BURN", [0, 0, 36, 0, 110, 0, 60, 0], (0, 127, 127, 40), 0, (30, 0, 14, 30), ()),
+    ("FLUTE", "NIN.DRONE DARK", [0, -12, 12, 0, 50, 0, 0, 0], (24, 100, 120, 90), 1, (0, 20, 30, 80), ()),
+    ("FLUTE", "NIN.DRONE GRIT", [0, 0, 44, 0, 100, 0, 50, 0], (12, 80, 120, 60), 1, (30, 10, 20, 40), ()),
+    ("SCRCH", "NIN.HLAH FUZZ", [0, 0, 20, 0, 110, 0, 90, 0], (0, 127, 127, 26), 1, (50, 0, 0, 4), ()),
+    ("SCRCH", "NIN.HLAH SUB", [0, -12, 0, 0, 84, 0, 16, 0], (0, 127, 127, 30), 1, (0, 0, 0, 0), ()),
 ]
 
 KIT_BASE = 53                     # F3, the lowest FM-1 key

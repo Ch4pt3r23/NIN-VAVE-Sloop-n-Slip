@@ -29,33 +29,65 @@
  * SYN4 a sampled kit for each other song, its set NIN_KIT_SETS[k] (gen_samples.py: GM-mapped as PERC). Appended:
  * the kit numbers of SLOOP's projects stay */
 #define DRUM_NIN (DRUM_SYN + DSU_N)
-#define NIN_NKITS 9u
-static const char *const NIN_KIT_SETS[NIN_NKITS] = {"TLIE", "SANC", "ONLY", "DISC", "ECHO", "LETU", "DEMN", "CORO", "9999"};
+#define NIN_NKITS 13u
+static const char *const NIN_KIT_SETS[NIN_NKITS] = {"TLIE", "SANC", "ONLY", "DISC", "ECHO", "LETU", "DEMN", "CORO", "9999",
+                                                    "CLSR", "MOTP", "THTF", "SURV"};   /* (1.1) */
 #define DRUM_KITS (DRUM_NIN + NIN_NKITS)
-static const char *const DRUM_KIT_NAMES[] = {"HLAH", "HLAH DP", "HLAH TGT", "HLAH BRT", "HLAH DST", DS_KIT_NAME_LIST,
+static const char *const DRUM_KIT_NAMES[] = {"NIN.HLAH", "NIN.DEEP", "NIN.TIGHT", "NIN.BRITE", "NIN.DUST",
+                                             DS_KIT_NAME_LIST,
                                              "USR1", "USR2", "USR3", "USR4", "USR3+4",
                                              "SYN1", "SYN2", "SYN3", "SYN4",
-                                             "TLIE", "SANC", "ONLY", "DISC", "ECHO", "LETU", "DEMN", "CORO", "999999"};
+                                             "NIN.TLIE", "NIN.SANC", "NIN.ONLY", "NIN.DISC", "NIN.ECHO", "NIN.LETU",
+                                             "NIN.DEMN", "NIN.CORO", "NIN.9999", "NIN.CLSR", "NIN.MOTP", "NIN.THTF",
+                                             "NIN.SURV"};
 static const char *const DRUM_KIT_STYLES[] = {"HEAD HOLE", "HOLE DEEP", "HOLE PUNCH", "HOLE BRIGHT", "HOLE DUSTY",
                                               DS_KIT_STYLE_LIST,
                                               "YOUR KIT", "YOUR KIT", "YOUR KIT", "YOUR KIT", "BIG KIT",
                                               "YOUR SYNTH", "YOUR SYNTH", "YOUR SYNTH", "YOUR SYNTH",
                                               "TERRIBLE LIE", "SANCTIFIED", "ONLY TIME", "DISCIPLINE", "ECHOPLEX",
-                                              "LETTING YOU", "DEMON SEED", "CORONA RAD", "999,999"};
+                                              "LETTING YOU", "DEMON SEED", "CORONA RAD", "999,999", "CLOSER",
+                                              "MARCH PIGS", "HAND FEEDS", "SURVIVALISM"};
 _Static_assert(sizeof(DRUM_KIT_NAMES) / sizeof(DRUM_KIT_NAMES[0]) == DRUM_KITS, "a name per kit");
-/* NIN-VAVE: the order PRESETS steps the kits in: HLAH, the songs' kits, HLAH's treatments, then SLOOP's (808 ..
- * SYN4). The kit numbers stay (projects, Program Change, the editor): only the knob's way through them changes */
-static uint32_t kit_pos(uint32_t kit)
+/* NIN-VAVE: the kits PRESETS steps through, in order: NIN.HLAH, the songs' kits, HLAH's treatments, then a few of
+ * SLOOP's synthesised ones (KIT_KEEP: the 808, 909, 606, the vintage box, industrial), then USR and SYN. SLOOP's
+ * other kits are off the knob; the kit numbers stay (projects, Program Change, the editor still reach every kit) */
+static const char *const KIT_KEEP[] = {"808", "909", "606", "VINTAGE", "INDUSTR"};
+#define KIT_NKEEP (sizeof KIT_KEEP / sizeof KIT_KEEP[0])
+#define KIT_SHOWN (1u + NIN_NKITS + 4u + KIT_NKEEP + SMP_USER_SLOTS + 1u + DSU_N)
+static uint8_t kit_order[KIT_SHOWN], kit_ordered;
+static void kit_order_init(void)
 {
-    return kit == 0u ? 0u : kit >= DRUM_NIN ? 1u + (kit - DRUM_NIN) : NIN_NKITS + kit;   /* (1..: after the songs) */
+    uint32_t n = 0, i, k;
+    if (kit_ordered)
+        return;
+    kit_ordered = 1;
+    kit_order[n++] = 0;
+    for (i = 0; i < NIN_NKITS; i++) kit_order[n++] = (uint8_t)(DRUM_NIN + i);
+    for (i = 1; i < DRUM_SAMPLED; i++) kit_order[n++] = (uint8_t)i;
+    for (k = 0; k < KIT_NKEEP; k++)
+        for (i = DRUM_SAMPLED; i < DRUM_USR; i++)
+            if (str_eq(DRUM_KIT_NAMES[i], KIT_KEEP[k])) kit_order[n++] = (uint8_t)i;
+    for (i = DRUM_USR; i < DRUM_NIN && n < KIT_SHOWN; i++) kit_order[n++] = (uint8_t)i;
+    while (n < KIT_SHOWN) kit_order[n++] = 0;        /* (a KIT_KEEP name not found: never, tests) */
+}
+static uint32_t kit_pos(uint32_t kit)              /* its place on the knob, KIT_SHOWN = off it */
+{
+    uint32_t i;
+    kit_order_init();
+    for (i = 0; i < KIT_SHOWN; i++)
+        if (kit_order[i] == kit) return i;
+    return KIT_SHOWN;
 }
 static uint32_t kit_at(uint32_t pos)
 {
-    return pos == 0u ? 0u : pos <= NIN_NKITS ? DRUM_NIN + pos - 1u : pos - NIN_NKITS;
+    kit_order_init();
+    return kit_order[pos < KIT_SHOWN ? pos : KIT_SHOWN - 1u];
 }
-static int16_t kit_step(int32_t kit, int32_t s)    /* the kit s detents on from kit (stops at the ends) */
+static int16_t kit_step(int32_t kit, int32_t s)    /* the kit s detents on from kit (stops at the ends; off the knob:
+                                                    * from the first) */
 {
-    return (int16_t)kit_at((uint32_t)clamp((int32_t)kit_pos((uint32_t)clamp(kit, 0, DRUM_KITS - 1)) + s, 0, DRUM_KITS - 1));
+    uint32_t p = kit_pos((uint32_t)clamp(kit, 0, DRUM_KITS - 1));
+    return (int16_t)kit_at((uint32_t)clamp((int32_t)(p < KIT_SHOWN ? p : 0u) + s, 0, KIT_SHOWN - 1));
 }
 static uint32_t drum_kit(void) { return (uint32_t)clamp(TDRUM->p[P_E0], 0, DRUM_KITS - 1); }
 #define DRUM_DEFAULT_KIT 0u             /* power-on: HLAH (NIN-VAVE; SLOOP: the 808) */

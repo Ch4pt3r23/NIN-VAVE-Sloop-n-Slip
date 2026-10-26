@@ -34,6 +34,7 @@ PER_SONG = 3                                     # patterns per song
 HLAH = "hlah-multitrack/Head Like a Hole (115 BPM)/"
 PHP = "php-pack/Pretty Hate Pack/"
 SLIP = "slip/"
+ND = "nd/"                                       # nindestruct.com multitracks (Hera: NIN-Multitracks/nindestruct)
 # drums: stems the hits come from (a mixed stem is sorted by band); the first kick-ish stem gives the kick.
 # perc: stems for the percussion / FX lanes. bass: the bass line of the patterns. grid: "track" finds the beats
 # (bpm is a hint), "fixed" trusts bpm from the start of the file (The Slip's markers file says so).
@@ -81,6 +82,24 @@ SONGS = [
          perc=[SLIP + "Multitrack.999999/Audio Files/999,999 Andromeda.wav"],
          bass=SLIP + "Multitrack.999999/Audio Files/999,999 Bass.wav",
          markers=SLIP + "Multitrack.999999/999,999 markers and tempo.mid"),
+    # NIN-VAVE 1.1 (nindestruct.com: The Downward Spiral, With Teeth, Year Zero). Closer is Rock Band's split
+    # (drums_1 kick, drums_2 snare, drums_3 cymbals); the others one drum stem. "auto": the tempo fitted near the hint
+    dict(tag="CLSR", name="CLOSER", bpm=89.1, grid="track", bar=4,
+         kick=ND + "Multitrack.Closer/Audio files/drums_1.wav", snare=ND + "Multitrack.Closer/Audio files/drums_2.wav",
+         hats=ND + "Multitrack.Closer/Audio files/drums_3.wav", perc=[ND + "Multitrack.Closer/Audio files/song.wav"],
+         bass=ND + "Multitrack.Closer/Audio files/rhythm.wav"),
+    dict(tag="MOTP", name="MARCH OF THE PIGS", bpm=136.0, grid="auto", bar=4, patterns=False,   # (its metre moves)
+         drums=ND + "Multitrack.MOTP/Audio Files/march of the pigs - drums.flac.WAV",
+         perc=[ND + "Multitrack.MOTP/Audio Files/march of the pigs - bg sounds.flac.WAV"],
+         bass=ND + "Multitrack.MOTP/Audio Files/march of the pigs - bass synth.flac.WAV"),
+    dict(tag="THTF", name="THE HAND THAT FEEDS", bpm=129.2, grid="auto", bar=4,
+         drums=ND + "Multitrack.THTF/Audio Files/Drum comp.flac.WAV",
+         perc=[ND + "Multitrack.THTF/Audio Files/Synthetic Perc.flac.WAV", ND + "Multitrack.THTF/Audio Files/Percussion.flac.WAV"],
+         bass=ND + "Multitrack.THTF/Audio Files/Bass.flac.WAV"),
+    dict(tag="SURV", name="SURVIVALISM", bpm=129.2, grid="auto", bar=4, patterns=False,   # (its kick, snare, hats: not apart)
+         drums=ND + "Multitrack.Survivalism/Audio Files/Survivalism Drm.wav",
+         perc=[ND + "Multitrack.Survivalism/Audio Files/Survivalism Noiz+Nord Perc.wav"],
+         bass=ND + "Multitrack.Survivalism/Audio Files/Survivalism Bass.wav"),
 ]
 # the NIN sounds in SLOOP's melodic sets (the set keeps its number: presets and projects still find it)
 MELODIC = {
@@ -234,6 +253,16 @@ def markers(song):
 
 def grid_of(song, n):
     """16ths (samples) from the first downbeat, and [(step, section name)]"""
+    if song["grid"] == "auto":
+        # a steady, programmed song without a markers file: the tempo near the hint where the kicks and snares sit
+        # tightest on the 16th grid (the length of their mean phase vector), then as "fixed"
+        hits = np.concatenate([band_onsets(song["drums"], "low", 0.3), band_onsets(song["drums"], "mid", 0.3)])
+        def fit(b): return abs(np.exp(2j * np.pi * hits / (SR * 60 / b / 4)).mean())
+        song["bpm"] = float(max(np.arange(song["bpm"] * 0.94, song["bpm"] * 1.06, 0.02), key=fit))
+        song["grid"] = "fixed"
+        g, _ = grid_of(song, n)
+        song["grid"] = "auto"
+        return g, []
     if song["grid"] == "fixed":
         # the tempo is exact (the markers file), the start may not be: the grid goes where the kicks and snares
         # land (their circular mean phase on the 16th)
@@ -243,7 +272,7 @@ def grid_of(song, n):
         off = np.angle(np.exp(1j * ph).mean()) / (2 * np.pi) * step   # signed: -half .. +half a step
         song["offset_ms"] = off * 1000 / SR
         g = np.clip(np.arange(0, n, step) + off, 0, None).astype(int)   # (step k stays step k)
-        return g, [(int(round(b * 4)), name) for b, name in markers(song)]
+        return g, [(int(round(b * 4)), name) for b, name in markers(song)] if "markers" in song else []
     k, s = load(song["kick"]), load(song["snare"])
     m = min(len(k), len(s))
     _, beats = librosa.beat.beat_track(y=k[:m] + s[:m], sr=SR, hop_length=512, units="samples", bpm=song["bpm"])
@@ -449,6 +478,8 @@ def main():
     KITS.mkdir(parents=True, exist_ok=True)
     pdir = REPORT.parent / "patterns"
     pdir.mkdir(parents=True, exist_ok=True)
+    for p in pdir.glob("*.wav"):                     # (renders of patterns a run before had and this one has not)
+        p.unlink()
     all_pats = []
     for si, song in enumerate(SONGS):
         print(f"== {song['name']}", flush=True)
@@ -464,8 +495,8 @@ def main():
                                 zones=LANES[role]))
         (d / "kit.json").write_text(json.dumps(dict(name=song["tag"], song=song["name"], sounds=entries), indent=1))
         secs = sum(len(x) for x in kit.values()) / SR
-        pats = patterns_of(song)
-        report.append(f"{song['name']}: kit {len(kit)} sounds, {secs:.2f} s"
+        pats = patterns_of(song) if song.get("patterns", True) else []
+        report.append(f"{song['name']}: kit {len(kit)} sounds, {secs:.2f} s, {song['bpm']:.2f} BPM"
                       + (f", grid offset {song['offset_ms']:.1f} ms" if "offset_ms" in song else ""))
         for p in pats:
             p.update(song=si, bpm=song["bpm"], label=f"{song['tag']} {short(p['name'])}")

@@ -3,10 +3,10 @@
 #pragma once
 #include <stdint.h>
 
-#define NIN_NSONG 10u
-#define NIN_NPAT 27u
-static const char *const NIN_SONG_NAME[NIN_NSONG] = {"HEAD LIKE A HOLE", "TERRIBLE LIE", "SANCTIFIED", "THE ONLY TIME", "DISCIPLINE", "ECHOPLEX", "LETTING YOU", "DEMON SEED", "CORONA RADIATA", "999,999"};
-static const char *const NIN_SONG_TAG[NIN_NSONG] = {"HLAH", "TLIE", "SANC", "ONLY", "DISC", "ECHO", "LETU", "DEMN", "CORO", "9999"};
+#define NIN_NSONG 14u
+#define NIN_NPAT 33u
+static const char *const NIN_SONG_NAME[NIN_NSONG] = {"HEAD LIKE A HOLE", "TERRIBLE LIE", "SANCTIFIED", "THE ONLY TIME", "DISCIPLINE", "ECHOPLEX", "LETTING YOU", "DEMON SEED", "CORONA RADIATA", "999,999", "CLOSER", "MARCH OF THE PIGS", "THE HAND THAT FEEDS", "SURVIVALISM"};
+static const char *const NIN_SONG_TAG[NIN_NSONG] = {"HLAH", "TLIE", "SANC", "ONLY", "DISC", "ECHO", "LETU", "DEMN", "CORO", "9999", "CLSR", "MOTP", "THTF", "SURV"};
 /* a factory pattern: its song (the kit NIN<song>), tempo, length in 16ths (16, or 24 in 6/4), the drum lanes'
  * steps (bit s = step s; lanes as drums.c LANE_NOTE) and the bass line's MIDI notes (0 = rest) */
 typedef struct { char name[10]; uint8_t song, steps; uint16_t bpm10; uint8_t lane[5]; uint32_t mask[5]; uint8_t bass[24]; } nin_pat_t;
@@ -38,4 +38,10 @@ static const nin_pat_t NIN_PAT[NIN_NPAT] = {
     {"CORO POSS", 8, 16, 550u, {0, 2, 4, 7, 255}, {0x000515u, 0x000000u, 0x000000u, 0x000000u, 0x000000u}, {52, 0, 0, 53, 52, 0, 0, 0, 0, 53, 0, 0, 52, 53, 52, 53, 0, 0, 0, 0, 0, 0, 0, 0}},
     {"CORO PRIN", 8, 16, 550u, {0, 2, 4, 7, 255}, {0x000555u, 0x001000u, 0x000000u, 0x000000u, 0x000000u}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
     {"9999 INSE", 9, 16, 910u, {0, 2, 4, 7, 255}, {0x000480u, 0x000400u, 0x000481u, 0x00FFF0u, 0x000000u}, {34, 25, 33, 39, 33, 35, 36, 48, 0, 0, 0, 0, 0, 36, 34, 32, 0, 0, 0, 0, 0, 0, 0, 0}},
+    {"CLSR B", 10, 16, 891u, {0, 2, 4, 7, 255}, {0x001111u, 0x001010u, 0x000000u, 0x000000u, 0x000000u}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+    {"CLSR C", 10, 16, 891u, {0, 2, 4, 7, 255}, {0x001111u, 0x001010u, 0x00FFFFu, 0x001000u, 0x000000u}, {24, 0, 0, 0, 46, 36, 30, 0, 0, 24, 36, 0, 48, 0, 23, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+    {"CLSR A", 10, 16, 891u, {0, 2, 4, 7, 255}, {0x001111u, 0x001010u, 0x00FFFFu, 0x000000u, 0x000000u}, {24, 0, 0, 0, 46, 36, 30, 0, 0, 24, 36, 0, 48, 0, 23, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+    {"THTF A", 12, 16, 1280u, {0, 2, 4, 7, 255}, {0x005555u, 0x001111u, 0x005555u, 0x000000u, 0x000000u}, {33, 0, 0, 0, 31, 0, 33, 0, 0, 37, 35, 36, 29, 39, 31, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+    {"THTF C", 12, 16, 1280u, {0, 2, 4, 7, 255}, {0x005515u, 0x001115u, 0x005515u, 0x000000u, 0x000000u}, {29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+    {"THTF B", 12, 16, 1280u, {0, 2, 4, 7, 255}, {0x005511u, 0x005511u, 0x005511u, 0x000000u, 0x000000u}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
 };

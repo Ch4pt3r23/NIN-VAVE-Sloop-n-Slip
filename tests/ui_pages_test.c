@@ -153,12 +153,12 @@ static void t_nin(void)
     uint16_t before[FAV_N];
     host_tracks_init();
     for (i = 0; i < FAV_N; i++) fav[i] = FAV_NONE;
-    fav[0] = 0;                                         /* a favourite of the user's (BANK 0) */
+    fav[0] = (uint16_t)nin_bank("808 BOOM");             /* a favourite of the user's (one of SLOOP's) */
     TDRUM->p[P_E0] = (int16_t)DRUM_SAMPLED;             /* as SLOOP left it: the 808 */
     nin_boot();
     n = fav_list(b);
-    check(n == NIN_NFAV + 1u && !strcmp(BANK[b[0]].name, "HLAH BASS") && !strcmp(BANK[b[NIN_NFAV - 1u]].name, "HLAH KIT") &&
-          b[NIN_NFAV] == 0u, "NIN-VAVE first power-on: the NIN sounds first among the favourites, the user's after");
+    check(n == NIN_NFAV + 1u && !strcmp(BANK[b[0]].name, "NIN.HLAH BASS") && !strcmp(BANK[b[NIN_NFAV - 1u]].name, "NIN.HLAH KIT") &&
+          b[NIN_NFAV] == nin_bank("808 BOOM"), "NIN-VAVE first power-on: the NIN sounds first among the favourites, the user's after");
     for (i = 0; i < 16u; i++) lanes |= TDRUM->dstep[i].on[0] | TDRUM->dstep[i].on[1] << 8;
     for (i = 0; i < 16u; i++) bass += trk[0].step[i].n;
     check(TDRUM->p[P_E0] == 0 && lanes && bass && song.g[G_BPM] == 115 && TDRUM->p[P_SLEN] == 16 &&
@@ -170,10 +170,20 @@ static void t_nin(void)
     check(!memcmp(before, fav, sizeof before) && TDRUM->p[P_E0] == (int16_t)DRUM_SAMPLED,
           "NIN-VAVE later power-ons: nothing changes (the autosave as it was)");
     check(kit_step(0, 1) == (int16_t)DRUM_NIN && kit_step(DRUM_NIN + NIN_NKITS - 1u, 1) == 1 &&
-          kit_step(4, 1) == (int16_t)DRUM_SAMPLED && kit_step(DRUM_NIN - 1u, 1) == (int16_t)(DRUM_NIN - 1u) &&
-          kit_step(0, -1) == 0 && kit_step(DRUM_SAMPLED, -1) == 4, "NIN-VAVE PRESETS on the drum track: HLAH, the songs, HLAH's treatments, SLOOP's");
-    for (i = 0; i < DRUM_KITS; i++) ok &= kit_at(kit_pos(i)) == i;
-    check(ok, "NIN-VAVE kit order: every kit once");
+          kit_step(4, 1) == (int16_t)DRUM_SAMPLED && !strcmp(DRUM_KIT_NAMES[kit_step(DRUM_SAMPLED, 1)], "909") &&
+          kit_step(DRUM_NIN - 1u, 1) == (int16_t)(DRUM_NIN - 1u) && kit_step(0, -1) == 0 && kit_step(DRUM_SAMPLED, -1) == 4,
+          "NIN-VAVE PRESETS on the drum track: HLAH, the songs, HLAH's treatments, 808 909 .., USR, SYN");
+    {
+        uint32_t shown = 0, nin = 0;
+        for (i = 0; i < DRUM_KITS; i++)
+            if (kit_pos(i) < KIT_SHOWN) {
+                ok &= kit_at(kit_pos(i)) == i;
+                shown++;
+                nin += !strncmp(DRUM_KIT_NAMES[i], "NIN.", 4);
+            }
+        check(ok && shown == KIT_SHOWN && nin == 5u + NIN_NKITS, "NIN-VAVE kit order: every kit on the knob once, all the NIN ones");
+        printf("  kits: %u on the knob (%u NIN), %u of SLOOP's off it\n", shown, nin, (unsigned)DRUM_KITS - shown);
+    }
     for (ok = 1, i = 0; i < NIN_NPAT; i++) {
         nin_pattern_load(i);
         ok &= TDRUM->p[P_SLEN] == NIN_PAT[i].steps && (uint32_t)TDRUM->p[P_E0] < DRUM_KITS;
@@ -193,8 +203,9 @@ int main(int argc, char **argv)
     uint32_t i;
     outdir = argc > 1 ? argv[1] : "build/host";
     t_nin();
-    {   /* the preset list by kind (ui.c BANK): every factory preset of every engine once, every name found */
-        uint32_t e, k, n, hits;
+    {   /* the preset list by kind (ui.c BANK): every name found, no preset twice. NIN-VAVE: every NIN. preset in it
+         * (the first ones); SLOOP's other presets may be left out (kept for old projects, off the PRESETS knob) */
+        uint32_t e, k, n, hits, hidden = 0;
         bank_resolve();
         for (n = 0; n < NBANK; n++)
             if (bank_pi[n] == 0xFF) {
@@ -205,11 +216,17 @@ int main(int argc, char **argv)
             for (k = 0; k < ENGINES[e]->npresets; k++) {
                 for (hits = 0, n = 0; n < NBANK; n++)
                     hits += BANK[n].e == e && bank_pi[n] == k;
-                if (hits != 1) {
+                if (hits > 1 || (!hits && !strncmp(ENGINES[e]->presets[k].name, "NIN.", 4))) {
                     printf("ui: preset %s (engine %u) is %u times in BANK\n", ENGINES[e]->presets[k].name, e, hits);
                     fails++;
                 }
+                hidden += !hits;
             }
+        for (n = 0, k = 1; n < NBANK; n++)              /* the NIN group first, all of it */
+            if (!strncmp(BANK[n].name, "NIN.", 4) != (BANK[n].kind == BK_NIN) || (n && BANK[n].kind == BK_NIN && BANK[n - 1u].kind != BK_NIN))
+                k = 0;
+        check(k && BANK[0].kind == BK_NIN, "NIN-VAVE: PRESETS lists the NIN sounds first, as one group");
+        printf("  BANK: %u entries, %u of SLOOP's presets left off the knob\n", (unsigned)NBANK, (unsigned)hidden);
     }
     panel = PANEL_DEFAULT;
     layers_init();
