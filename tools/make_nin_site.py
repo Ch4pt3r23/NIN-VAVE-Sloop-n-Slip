@@ -52,7 +52,11 @@ def installer_text(html):
                   'rel="noopener">where each comes from</a>.', html, flags=re.S)
     html = html.replace("@@AFFIL@@", "NIN-VAVE is not affiliated with them, nor with Nine Inch Nails or SLOOP.")
     return html.replace("</head>", "<style>button#go:not(:disabled) { background: #e02020; color: #fff; }\n"
-                        "progress::-webkit-progress-value { background: #e02020; }</style>\n</head>", 1)
+                        "progress::-webkit-progress-value { background: #e02020; }\n"
+                        '@font-face { font-family: "Special Elite"; font-display: swap; '
+                        "src: url(../../fonts/special-elite-latin.woff2) format('woff2'); }\n"
+                        'h1, button#go, .lead { font-family: "Special Elite", "Courier New", monospace; }</style>\n</head>',
+                        1)
 
 
 def main(fw, version, out, pack_dirs):
@@ -93,6 +97,7 @@ def main(fw, version, out, pack_dirs):
     shutil.copy(ROOT / "web/nin_index.html", out / "index.html")
     shutil.copy(ROOT / "web/nin_packs.js", out / "nin_packs.js")
     shutil.copy(ROOT / "assets/logo/nin-vave-logo.svg", out / "nin-vave-logo.svg")
+    shutil.copytree(ROOT / "web/fonts", out / "fonts", dirs_exist_ok=True)   # Special Elite and its licence
     (out / "_headers").write_text("/*\n  X-Content-Type-Options: nosniff\n"
                                   "/\n  Cache-Control: no-cache\n/index.html\n  Cache-Control: no-cache\n"
                                   "/packs/*\n  Cache-Control: no-cache\n/firmware/*\n  Cache-Control: no-cache\n"
