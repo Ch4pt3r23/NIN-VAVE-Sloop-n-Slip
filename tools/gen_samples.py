@@ -44,6 +44,9 @@ TR = 22050                                   # stored sample rate
 # NIN-VAVE: the songs' drum kits (tools/nin_kits.py). NIN_GM_KIT takes the GM kit's place (PERC: the kits ACOUSTIC ..
 # DUST); NIN_KITS are sets of their own after every other set (drums.c NIN_KIT_SETS: the same names, the same order)
 NIN = SRC / "assets" / "nin-kits"
+# how SAMPLE's SET list shows the sets (all NIN sounds now): 8 characters at most
+NIN_SET_LABEL = {"PIANO": "NIN.PNO", "BASS": "NIN.BASS", "VIBES": "NIN.MRMB", "HORNS": "NIN.STAB", "STRGS": "NIN.STRG",
+                 "FLUTE": "NIN.DRON", "SCRCH": "NIN.HLBS", "PERC": "NIN.KIT"}
 NIN_GM_KIT = "HLAH"
 NIN_KITS = ["TLIE", "SANC", "ONLY", "DISC", "ECHO", "LETU", "DEMN", "CORO", "9999", "CLSR", "MOTP", "THTF", "SURV"]
 
@@ -452,8 +455,11 @@ class Builder:
             i = next((j for j, (n, _, _) in enumerate(named) if n == setname), None)
             if i is not None:
                 L.append(preset(i, self.kinds.get(setname, "wave"), *rest))
+        for k in range(4):                          # NIN-VAVE: USR1..USR4 (a NIN pack), SET = after the sets; the UI
+            L.append(preset(len(named) + k, "oneshot", f"NIN.SLOT{k + 1}", [0, 0, 0, 0, 127, 0, 0, 0],   # shows the
+                            (0, 127, 127, 40), 0, (0, 4, 6, 14), ()))                       # slot's own name instead
         L.append("};")
-        names = ", ".join(f'"{n}"' for n, _, _ in named)
+        names = ", ".join(f'"{NIN_SET_LABEL.get(n, n)}"' for n, _, _ in named)   # (the SET list; SMP_SETS keeps the names)
         L.append("#define SMP_SET_NAMES_INIT " + names)
         L.append("static const char *const SMP_SET_NAMES[] = {" + names + "};")
         L += self.break_header()

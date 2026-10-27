@@ -170,9 +170,10 @@ static void t_nin(void)
     check(!memcmp(before, fav, sizeof before) && TDRUM->p[P_E0] == (int16_t)DRUM_SAMPLED,
           "NIN-VAVE later power-ons: nothing changes (the autosave as it was)");
     check(kit_step(0, 1) == (int16_t)DRUM_NIN && kit_step(DRUM_NIN + NIN_NKITS - 1u, 1) == 1 &&
-          kit_step(4, 1) == (int16_t)DRUM_SAMPLED && !strcmp(DRUM_KIT_NAMES[kit_step(DRUM_SAMPLED, 1)], "909") &&
-          kit_step(DRUM_NIN - 1u, 1) == (int16_t)(DRUM_NIN - 1u) && kit_step(0, -1) == 0 && kit_step(DRUM_SAMPLED, -1) == 4,
-          "NIN-VAVE PRESETS on the drum track: HLAH, the songs, HLAH's treatments, 808 909 .., USR, SYN");
+          kit_step(4, 1) == (int16_t)DRUM_USR && kit_step(DRUM_USR + 3u, 1) == (int16_t)DRUM_SAMPLED &&
+          !strcmp(DRUM_KIT_NAMES[kit_step(DRUM_SAMPLED, 1)], "909") &&
+          kit_step(DRUM_NIN - 1u, 1) == (int16_t)(DRUM_NIN - 1u) && kit_step(0, -1) == 0 && kit_step(DRUM_SAMPLED, -1) == (int16_t)(DRUM_USR + 3u),
+          "NIN-VAVE PRESETS on the drum track: HLAH, the songs, HLAH's treatments, USR1..4 (the packs), 808 909 .., SYN");
     {
         uint32_t shown = 0, nin = 0;
         for (i = 0; i < DRUM_KITS; i++)

@@ -455,6 +455,7 @@ UI_SMALL static uint32_t graph_signature(void)
     }
     return h;
 }
+static const char *preset_shown(const char *nm);   /* (NIN-VAVE, below: NIN.SLOTn by its slot's name) */
 /* preset browser: the list by kind (ui.c BANK), the current one in white */
 UI_SMALL static void graph_browse(void)
 {
@@ -473,7 +474,7 @@ UI_SMALL static void graph_browse(void)
             up_name(k, nm);
         } else {                                         /* its kind: BASS, KEYS, PAD... */
             str_cpy(tag, preset_kind(n), sizeof tag);
-            str_cpy(nm, ENGINES[e]->presets[k].name, sizeof nm);
+            str_cpy(nm, preset_shown(ENGINES[e]->presets[k].name), sizeof nm);
         }
         if (sel)
             cv_rect(4, y + 6, 3, 3, C_WHITE);
@@ -551,9 +552,22 @@ UI_SMALL static uint32_t trk_level(uint32_t c)                /* LEVEL 0..127 (t
     return (uint32_t)(c == TRK_DRUM ? song.g[G_DRLVL] : trk[c].p[P_LEVEL]) & 127u;
 }
 
+/* NIN-VAVE: the presets NIN.SLOT1..4 play the user slots (a NIN pack): shown by the slot's own name (NIN.WSBS ..)
+ * when it holds one */
+UI_SMALL static const char *preset_shown(const char *nm)
+{
+    static const char P[] = "NIN.SLOT";
+    uint32_t i, k;
+    for (i = 0; i < 8u; i++)
+        if (nm[i] != P[i])                           /* (stops at a shorter name's end: its 0 differs) */
+            return nm;
+    k = (uint32_t)(nm[8] - '1');
+    return k < SMP_USER_SLOTS && !nm[9] && usr_nz[k] ? usr_label[k] : nm;
+}
 /* NIN-VAVE: NIN.<name> as <name> where room is short (the tracks, the status line): everything there is NIN anyway */
 UI_SMALL static const char *nin_short(const char *nm)
 {
+    nm = preset_shown(nm);
     return nm + (nm[0] == 'N' && nm[1] == 'I' && nm[2] == 'N' && nm[3] == '.' ? 4 : 0);
 }
 UI_SMALL static void trk_short_name(uint32_t c, char *b)      /* the track's sound, b holds 13 */

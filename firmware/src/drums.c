@@ -35,7 +35,8 @@ static const char *const NIN_KIT_SETS[NIN_NKITS] = {"TLIE", "SANC", "ONLY", "DIS
 #define DRUM_KITS (DRUM_NIN + NIN_NKITS)
 static const char *const DRUM_KIT_NAMES[] = {"NIN.HLAH", "NIN.DEEP", "NIN.TIGHT", "NIN.BRITE", "NIN.DUST",
                                              DS_KIT_NAME_LIST,
-                                             "USR1", "USR2", "USR3", "USR4", "USR3+4",
+                                             usr_label[0], usr_label[1], usr_label[2], usr_label[3], "USR3+4",   /* (a
+                                              * slot's own name: NIN.WISH .., eng_sample.c) */
                                              "SYN1", "SYN2", "SYN3", "SYN4",
                                              "NIN.TLIE", "NIN.SANC", "NIN.ONLY", "NIN.DISC", "NIN.ECHO", "NIN.LETU",
                                              "NIN.DEMN", "NIN.CORO", "NIN.9999", "NIN.CLSR", "NIN.MOTP", "NIN.THTF",
@@ -48,9 +49,10 @@ static const char *const DRUM_KIT_STYLES[] = {"HEAD HOLE", "HOLE DEEP", "HOLE PU
                                               "LETTING YOU", "DEMON SEED", "CORONA RAD", "999,999", "CLOSER",
                                               "MARCH PIGS", "HAND FEEDS", "SURVIVALISM"};
 _Static_assert(sizeof(DRUM_KIT_NAMES) / sizeof(DRUM_KIT_NAMES[0]) == DRUM_KITS, "a name per kit");
-/* NIN-VAVE: the kits PRESETS steps through, in order: NIN.HLAH, the songs' kits, HLAH's treatments, then a few of
- * SLOOP's synthesised ones (KIT_KEEP: the 808, 909, 606, the vintage box, industrial), then USR and SYN. SLOOP's
- * other kits are off the knob; the kit numbers stay (projects, Program Change, the editor still reach every kit) */
+/* NIN-VAVE: the kits PRESETS steps through, in order: the NIN group first (NIN.HLAH, the songs' kits, HLAH's
+ * treatments, then USR1..USR4: the slots a NIN pack fills, shown by their own names), then a few of SLOOP's
+ * synthesised ones (KIT_KEEP: the 808, 909, 606, the vintage box, industrial), USR3+4 and SYN. SLOOP's other kits are
+ * off the knob; the kit numbers stay (projects, Program Change, the editor still reach every kit) */
 static const char *const KIT_KEEP[] = {"808", "909", "606", "VINTAGE", "INDUSTR"};
 #define KIT_NKEEP (sizeof KIT_KEEP / sizeof KIT_KEEP[0])
 #define KIT_SHOWN (1u + NIN_NKITS + 4u + KIT_NKEEP + SMP_USER_SLOTS + 1u + DSU_N)
@@ -64,10 +66,11 @@ static void kit_order_init(void)
     kit_order[n++] = 0;
     for (i = 0; i < NIN_NKITS; i++) kit_order[n++] = (uint8_t)(DRUM_NIN + i);
     for (i = 1; i < DRUM_SAMPLED; i++) kit_order[n++] = (uint8_t)i;
+    for (i = DRUM_USR; i < DRUM_PAIR; i++) kit_order[n++] = (uint8_t)i;   /* USR1..USR4: the NIN packs */
     for (k = 0; k < KIT_NKEEP; k++)
         for (i = DRUM_SAMPLED; i < DRUM_USR; i++)
             if (str_eq(DRUM_KIT_NAMES[i], KIT_KEEP[k])) kit_order[n++] = (uint8_t)i;
-    for (i = DRUM_USR; i < DRUM_NIN && n < KIT_SHOWN; i++) kit_order[n++] = (uint8_t)i;
+    for (i = DRUM_PAIR; i < DRUM_NIN && n < KIT_SHOWN; i++) kit_order[n++] = (uint8_t)i;   /* USR3+4, SYN1..4 */
     while (n < KIT_SHOWN) kit_order[n++] = 0;        /* (a KIT_KEEP name not found: never, tests) */
 }
 static uint32_t kit_pos(uint32_t kit)              /* its place on the knob, KIT_SHOWN = off it */

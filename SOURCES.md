@@ -53,6 +53,14 @@ estimate where the drums sit tightest on the 16th grid (The Hand That Feeds 128.
 The NIN packs (`tools/nin_pack.py`, built into `build/nin/packs/`, not checked in) cut their kits and instruments
 from the same multitracks.
 
+## NIN-VAVE 1.2: the packs' other sources (nindestruct.com, as it describes them)
+
+| Pack | Songs | Multitrack |
+| --- | --- | --- |
+| BRKN | Wish, Last (Broken, 1992) | `Multitrack.Wish.2.zip` (separate drum, bass, guitar stems; `Multitrack.Wish.zip` is ripped from Guitar Hero: Warriors of Rock), `Multitrack.Last.zip` ripped from Rock Band |
+| TDS2 | Ruiner, Piggy, A Warm Place, Hurt (The Downward Spiral) | ripped from the TDS DualDisc: the six channels of its 5.1 mix, a file each (kits from the front and LFE channels, instruments from the front left) |
+| GHST1, GHST2 | Ghosts I-IV (2008): tracks 3, 6, 7, 9, 10, 15, 16, 20, 21, 22, 26, 28, 29, 33, 36 | sourced from the Ghosts I-IV Deluxe Edition's multitracks. Ghosts I-IV was released under Creative Commons Attribution-Noncommercial-Share Alike 3.0 (nin.com, 2008) |
+
 ## Pretty Hate Machine (1989), ripped from Rock Band 3
 
 | Song | Multitrack | Kit and patterns from |

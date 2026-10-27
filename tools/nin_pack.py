@@ -39,17 +39,80 @@ TESTS = dict(nk.ROLE_TEST)
 TESTS.update(tom=lambda F: 0.15 < F["share"]["low"] < 0.75 and F["cen"] < 1200 and F["decay"] > 0.12,
              crash=lambda F: F["share"]["high"] > 0.25 and F["decay"] > 0.35, perc=lambda F: True)
 ND, SLIP, HLAH = nk.ND, nk.SLIP, nk.HLAH
+VTS = "VTS_01_1 - 0x80 - Audio - AC3 - 6ch - 48kHz - DRC - English - DELAY "   # the DualDisc 5.1 rips: a file a channel
+
+
+def dd(song, delay, ch):
+    """a channel (C FL FR LFE SL SR) of a Downward Spiral DualDisc 5.1 rip"""
+    return ND + f"Multitrack.{song}/Multitrack.{song}/Audio Files/{VTS}{delay}.wav{ch}.wav"
+
+
+def gh(n, part, stem):
+    """a Ghosts I-IV stem: track n, its part (I..IV), the stem's name"""
+    return ND + f"Multitrack.{n}.Ghosts.{part}/{n} Ghosts {part}/Audio Files/{stem} {n}.wav"
+
+
+# slot names: 8 characters, all NIN. (the FM-1 shows a slot by its name: the KIT list, SET, and NIN.SLOT1..4 on PRESETS)
 PACKS = {
-    "TDS": dict(title="The Downward Spiral", slots=[
-        dict(name="NIN.CLSR", kit=dict(drums=[ND + "Multitrack.Closer/Audio files/drums_1.wav",
+    "TDS": dict(title="The Downward Spiral", about="Closer and March of the Pigs: their full 16-pad kits, Closer's bass, "
+                "the March of the Pigs bass synth (Rock Band rips)", slots=[
+        dict(name="NIN.CLS+", kit=dict(drums=[ND + "Multitrack.Closer/Audio files/drums_1.wav",
                                               ND + "Multitrack.Closer/Audio files/drums_2.wav",
                                               ND + "Multitrack.Closer/Audio files/drums_3.wav"],
                                        perc=[ND + "Multitrack.Closer/Audio files/song.wav"])),
-        dict(name="NIN.MOTP", kit=dict(drums=[ND + "Multitrack.MOTP/Audio Files/march of the pigs - drums.flac.WAV"],
+        dict(name="NIN.MTP+", kit=dict(drums=[ND + "Multitrack.MOTP/Audio Files/march of the pigs - drums.flac.WAV"],
                                        perc=[ND + "Multitrack.MOTP/Audio Files/march of the pigs - bg sounds.flac.WAV"])),
-        dict(name="CLSR BS", inst=dict(stem=ND + "Multitrack.Closer/Audio files/rhythm.wav", kind="bass")),
-        dict(name="MOTP SYN", inst=dict(stem=ND + "Multitrack.MOTP/Audio Files/march of the pigs - bass synth.flac.WAV",
+        dict(name="NIN.CLBS", inst=dict(stem=ND + "Multitrack.Closer/Audio files/rhythm.wav", kind="bass")),
+        dict(name="NIN.MPSY", inst=dict(stem=ND + "Multitrack.MOTP/Audio Files/march of the pigs - bass synth.flac.WAV",
                                         kind="bass")),
+    ]),
+    "TDS2": dict(title="The Downward Spiral II", about="Ruiner and Piggy kits, A Warm Place, Hurt (from the DualDisc's "
+                 "5.1 mixes, a channel at a time)", slots=[
+        dict(name="NIN.RUIN", kit=dict(drums=[dd("Ruiner", "-136ms", c) for c in ("C", "FL", "FR", "LFE")],
+                                       perc=[dd("Ruiner", "-136ms", c) for c in ("SL", "SR")])),
+        dict(name="NIN.PIGY", kit=dict(drums=[dd("Piggy", "-135ms", c) for c in ("C", "FL", "FR", "LFE")],
+                                       perc=[dd("Piggy", "-135ms", c) for c in ("SL", "SR")])),
+        dict(name="NIN.AWPL", inst=dict(stem=dd("A.Warm.Place", "-137ms", "FL"), kind="keys")),
+        dict(name="NIN.HURT", inst=dict(stem=dd("Hurt", "-127ms", "FL"), kind="keys")),
+    ]),
+    "BRKN": dict(title="Broken", about="Wish and Last: their kits from the separate drum stems, Wish's bass, "
+                 "Last's synth guitars", slots=[
+        dict(name="NIN.WISH", kit=dict(drums=[ND + f"Multitrack.Wish.2/Wish - drums{i}.flac" for i in (1, 2, 3)],
+                                       perc=[ND + "Multitrack.Wish.2/Wish - guitar.flac"])),
+        dict(name="NIN.LAST", kit=dict(drums=[ND + "Multitrack.Last/Last/Audio Files/last - bass drum.flac.WAV",
+                                              ND + "Multitrack.Last/Last/Audio Files/last - drums.flac.WAV",
+                                              ND + "Multitrack.Last/Last/Audio Files/last - cymbals.flac.WAV"],
+                                       perc=[ND + "Multitrack.Last/Last/Audio Files/last - guitars.flac.WAV"])),
+        dict(name="NIN.WSBS", inst=dict(stem=ND + "Multitrack.Wish.2/Wish - bass.flac", kind="bass")),
+        dict(name="NIN.LSGT", inst=dict(stem=ND + "Multitrack.Last/Last/Audio Files/last - synth guitars.flac.WAV",
+                                        kind="keys")),
+    ]),
+    "GHST1": dict(title="Ghosts I-IV", about="A kit of Ghosts' own drums (Ghosts 3, 20, 26, 29, 33), Ghosts piano, "
+                  "marimba and strings (Creative Commons BY-NC-SA)", slots=[
+        dict(name="NIN.GHK1", kit=dict(drums=[gh(20, "III", "Drums"), gh(26, "III", "Drums")], perc=[gh(3, "I", "Perc A")],
+                                       pads=dict(kick=[gh(3, "I", "Kick")], kick2=[gh(3, "I", "Mox Kick")],
+                                                 snare=[gh(3, "I", "Snr")], clap=[gh(3, "I", "The Clap")],
+                                                 chh=[gh(3, "I", "Hat")], ohh=[gh(33, "IV", "Hat")],
+                                                 rim=[gh(3, "I", "Off Hit")], snare2=[gh(29, "IV", "Clap")],
+                                                 tomlo=[gh(3, "I", "Toms")], tomhi=[gh(3, "I", "Toms")],
+                                                 ride=[gh(3, "I", "Tamb")], shaker=[gh(3, "I", "Shaker A")],
+                                                 conga=[gh(3, "I", "Konga")], bell=[gh(3, "I", "Perc B")]))),
+        dict(name="NIN.GHPN", inst=dict(stem=gh(36, "IV", "Piano"), kind="keys")),
+        dict(name="NIN.GHMR", inst=dict(stem=gh(15, "II", "Marimba"), kind="keys")),
+        dict(name="NIN.GHSG", inst=dict(stem=gh(9, "I", "Strings"), kind="keys")),
+    ]),
+    "GHST2": dict(title="Ghosts I-IV, second pack", about="Another Ghosts kit (909 kick, claps, tambourines, the "
+                  "bongo, kalimba), Mellotron, Buchla bass, banjo (Creative Commons BY-NC-SA)", slots=[
+        dict(name="NIN.GHK2", kit=dict(drums=[gh(7, "I", "Drums"), gh(21, "III", "Drums"), gh(22, "III", "Drums")],
+                                       perc=[gh(16, "II", "Perc"), gh(29, "IV", "Perc2")],
+                                       pads=dict(kick=[gh(7, "I", "909 K")], kick2=[gh(15, "II", "Crowd Kick")],
+                                                 clap=[gh(10, "II", "Clap")], chh=[gh(33, "IV", "Hat")],
+                                                 rim=[gh(29, "IV", "Perc1")], ride=[gh(29, "IV", "Tamb1")],
+                                                 shaker=[gh(29, "IV", "Shaker1")], conga=[gh(16, "II", "Fucked Bongo")],
+                                                 bell=[gh(29, "IV", "Kalim Hits")], pedal=[gh(16, "II", "Dist Tamb")]))),
+        dict(name="NIN.GHMT", inst=dict(stem=gh(6, "I", "M tron"), kind="keys")),
+        dict(name="NIN.GHBU", inst=dict(stem=gh(22, "III", "Buchla Low"), kind="bass")),
+        dict(name="NIN.GHBJ", inst=dict(stem=gh(28, "IV", "Banjo"), kind="keys")),
     ]),
 }
 
@@ -80,10 +143,16 @@ def hits(rels, test, n):
 
 
 def kit_slot(spec):
-    """16 pads: [(samples at RATE, root, lo, hi)], each pad on its lane's note"""
+    """16 pads: [(samples at RATE, root, lo, hi)], each pad on its lane's note. spec: drums (stems the drum roles are
+    sorted out of), perc (stems for the percussion pads), pads (optional: role -> stems of that one sound, as Ghosts
+    keeps its kick, hats, clap, shakers apart: any hit of them)"""
     used, zones, pool = {}, [], {}
     for role, test, secs, db in PADS:
-        key = (test, tuple(spec["perc"] if test == "perc" else spec["drums"]))
+        if role in spec.get("pads", {}):
+            test = "any"
+            key = (test, tuple(spec["pads"][role]))
+        else:
+            key = (test, tuple(spec["perc"] if test == "perc" else spec["drums"]))
         if key not in pool:
             pool[key] = hits(list(key[1]), test, 4)
         k = used.get(key, 0)
@@ -128,7 +197,7 @@ def build(name):
     pack = PACKS[name]
     d = OUT / name
     d.mkdir(parents=True, exist_ok=True)
-    manifest = dict(pack=name, title=pack["title"], slots=[])
+    manifest = dict(pack=name, title=pack["title"], about=pack.get("about", ""), slots=[])   # (about: the install site)
     for si, slot in enumerate(pack["slots"]):
         zones = kit_slot(slot["kit"]) if "kit" in slot else inst_slot(slot["inst"])
         sd = d / f"usr{si + 1}"

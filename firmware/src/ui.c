@@ -3,7 +3,7 @@
 /* Felucca user interface. Four columns map to KNOB 1..4. Rendering is lazy:
  * every element remembers what it last drew and is redrawn only on change. */
 #ifndef FELUCCA_VERSION
-#define FELUCCA_VERSION "NIN-VAVE 1.0"  /* SLOOP 2.8.1 with Nine Inch Nails kits, sounds and patterns (based on Felucca) */
+#define FELUCCA_VERSION "NIN-VAVE 1.2"  /* SLOOP 2.8.1 with Nine Inch Nails kits, sounds and patterns (based on Felucca) */
 #endif
 static void project_save(uint32_t slot);
 static void arrangement_save(void);
@@ -678,7 +678,8 @@ static const char *const BANK_KIND[] = {"BASS", "KEYS", "ORGN", "PAD", "LEAD", "
     {BK_NIN, 4, "NIN.DEMN STRGS"}, {BK_NIN, 4, "NIN.STRGS SLOW"}, {BK_NIN, 4, "NIN.STRGS BURN"}, \
     {BK_NIN, 4, "NIN.DISC MRMBA"}, {BK_NIN, 4, "NIN.MRMBA CRUSH"}, {BK_NIN, 4, "NIN.MRMBA ECHO"}, \
     {BK_NIN, 4, "NIN.CORO DRONE"}, {BK_NIN, 4, "NIN.DRONE DARK"}, {BK_NIN, 4, "NIN.DRONE GRIT"}, \
-    {BK_NIN, 4, "NIN.HLAH KIT"}
+    {BK_NIN, 4, "NIN.HLAH KIT"}, {BK_NIN, 4, "NIN.SLOT1"}, {BK_NIN, 4, "NIN.SLOT2"}, {BK_NIN, 4, "NIN.SLOT3"}, \
+    {BK_NIN, 4, "NIN.SLOT4"}   /* (USR1..USR4: a NIN pack, shown by its slots' names) */
 static const struct { uint8_t kind, e; const char *name; } BANK[] = {
     NIN_BANK,
     {BK_BASS, 0, "808 BOOM"}, {BK_BASS, 0, "ACID 303"}, {BK_BASS, 0, "SUB BASS"}, {BK_KEYS, 1, "DX RHODES"},

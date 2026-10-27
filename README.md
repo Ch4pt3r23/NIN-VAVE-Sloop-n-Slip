@@ -8,7 +8,7 @@ Everything SLOOP does is still here: three synth tracks and a drum track, twelve
 song mode, punch-in effects, pitch bend, the web editor. NIN-VAVE puts the NIN material first everywhere and keeps
 only a few of SLOOP's own sounds on the knobs: the 808, 909 and acid, and some 90s studio staples.
 
-> **Status: 1.1 (dev).** Builds on SLOOP 2.8.1 and passes its host tests (but for two cost checks SLOOP 2.8.1
+> **Status: 1.2 (dev).** Builds on SLOOP 2.8.1 and passes its host tests (but for two cost checks SLOOP 2.8.1
 > fails too); 1.0 runs on the FM-1.
 
 ## It boots as NIN-VAVE
@@ -82,12 +82,18 @@ python3 tools/nin_pack.py list                 # the packs
 python3 tools/nin_pack.py load TDS             # FM-1 on USB: USR1..USR4 <- the pack (about a minute)
 ```
 
-| Pack | USR1 | USR2 | USR3 | USR4 |
+| Pack | USR1 (kit) | USR2 | USR3 | USR4 |
 | --- | --- | --- | --- | --- |
-| TDS (The Downward Spiral) | NIN.CLSR kit (16 pads) | NIN.MOTP kit (16 pads) | Closer bass, 4 notes | March of the Pigs bass synth, 4 notes |
+| **TDS** The Downward Spiral | NIN.CLS+ Closer, 16 pads | NIN.MTP+ March of the Pigs kit | NIN.CLBS Closer bass | NIN.MPSY March of the Pigs bass synth |
+| **TDS2** The Downward Spiral II | NIN.RUIN Ruiner | NIN.PIGY Piggy kit | NIN.AWPL A Warm Place | NIN.HURT Hurt |
+| **BRKN** Broken | NIN.WISH Wish | NIN.LAST Last kit | NIN.WSBS Wish bass | NIN.LSGT Last synth guitars |
+| **GHST1** Ghosts I-IV | NIN.GHK1 Ghosts' own drums (Kick, Snr, Hat, The Clap, Toms, Konga, shakers) | NIN.GHPN piano | NIN.GHMR marimba | NIN.GHSG strings |
+| **GHST2** Ghosts I-IV | NIN.GHK2 (909 kick, claps, tambourines, bongo, kalimba) | NIN.GHMT Mellotron | NIN.GHBU Buchla bass | NIN.GHBJ banjo |
 
-Then: drum track, PRESETS to **USR1** or **USR2** for the kits; a synth track on the SAMPLE engine, **SET USR3** or
-**USR4** for the instruments (SAVE > USER stores the sound as a user preset).
+A loaded slot shows **by its own name** everywhere (1.2): on the drum track the kits sit in the NIN group, after the
+built-in NIN kits (NIN.WISH, NIN.GHK1 ...); on a synth track the NIN group ends with **NIN.SLOT1..4**, which play the
+four slots and show their names (NIN.GHPN, NIN.WSBS ...). An empty slot shows as USR1..USR4. SAMPLE's SET list
+names every set: NIN.PNO, NIN.BASS ... NIN.KIT, then the slots.
 
 ## Load a NIN pattern and jam
 
