@@ -1259,7 +1259,7 @@ UI_SMALL static void ui_input(void)
          * being edited. Every detent counts */
         uint32_t total, cur = preset_pos(&total);
         if (is_drum(TSEL))
-            TDRUM->p[P_E0] = (int16_t)clamp(TDRUM->p[P_E0] + s, 0, DRUM_KITS - 1);
+            TDRUM->p[P_E0] = kit_step(TDRUM->p[P_E0], s);   /* (NIN-VAVE: NIN kits first) */
         else if (total)
             preset_go((uint32_t)(((int32_t)cur + s % (int32_t)total + (int32_t)total) % (int32_t)total));
     }

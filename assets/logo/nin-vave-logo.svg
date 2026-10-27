@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120" width="420" height="120" role="img" aria-label="NIN-VAVE: Slip N' Sloop">
+  <rect width="420" height="120" fill="#000"/>
+  <text x="210" y="62" text-anchor="middle" font-family="'Special Elite', 'Courier New', ui-monospace, monospace" font-weight="400"
+        font-size="58" letter-spacing="6" fill="#f2f2f2">NIN-VAVE</text>
+  <rect x="40" y="74" width="340" height="6" fill="#e02020"/>
+  <text x="210" y="108" text-anchor="middle" font-family="'Special Elite', 'Courier New', ui-monospace, monospace" font-weight="400"
+        font-size="22" letter-spacing="4" fill="#e02020">SLIP N' SLOOP</text>
+</svg>

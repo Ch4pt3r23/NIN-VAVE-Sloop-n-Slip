@@ -24,6 +24,7 @@ slices) is written with it: SLC_BREAK_INIT.
 The header is cached in build/gen_samples.cache under a hash of every input.
 """
 import hashlib
+import json
 import math
 import os
 import re
@@ -40,6 +41,11 @@ GENDIR = SRC / "build" / "genwav"
 CACHE = SRC / "build" / "gen_samples.cache"
 CC0 = SRC / "assets" / "samples-cc0"
 TR = 22050                                   # stored sample rate
+# NIN-VAVE: the songs' drum kits (tools/nin_kits.py). NIN_GM_KIT takes the GM kit's place (PERC: the kits ACOUSTIC ..
+# DUST); NIN_KITS are sets of their own after every other set (drums.c NIN_KIT_SETS: the same names, the same order)
+NIN = SRC / "assets" / "nin-kits"
+NIN_GM_KIT = "HLAH"
+NIN_KITS = ["TLIE", "SANC", "ONLY", "DISC", "ECHO", "LETU", "DEMN", "CORO", "9999", "CLSR", "MOTP", "THTF", "SURV"]
 
 # set -> kind ("oneshot" decaying, "sus" looped sustain, "piano" its attack then a steady loop that the
 # envelope fades, "kit" one sample per key).
@@ -50,21 +56,34 @@ MEASURED_TUNING = ()                         # sets recorded off A440 (measured 
 
 # the preset of each set: name, {SET (filled in), TUNE, BITS, LOOP (filled in), CUT, -, DRV, -}, env, mono,
 # sends (DIST, CHORUS, DELAY, REVERB), more (track parameter, value) pairs (preset_t.x)
+# NIN-VAVE: every set holds a NIN sound (tools/nin_kits.py), named NIN.<song> <sound>
 SET_PRESETS = {
-    "PIANO": ("GRAND PNO", [0, 0, 0, 0, 127, 0, 0, 0], (0, 110, 0, 58), 0, (0, 6, 8, 24), ()),
-    "BASS": ("UP BASS", [0, 0, 0, 0, 118, 0, 12, 0], (0, 127, 127, 26), 1, (0, 0, 0, 4), ()),
-    "VIBES": ("VIBES", [0, 0, 0, 0, 127, 0, 0, 0], (0, 127, 127, 72), 0, (0, 24, 22, 30), ("P_LD_AMP", 18, "P_LRATE", 86)),
-    "HORNS": ("HORN STAB", [0, 0, 0, 0, 120, 0, 20, 0], (0, 127, 127, 22), 0, (8, 0, 14, 18), ()),
-    "STRGS": ("STRING STB", [0, 0, 0, 0, 122, 0, 10, 0], (0, 127, 127, 26), 0, (0, 10, 12, 24), ()),
-    "FLUTE": ("LOFI FLUTE", [0, 0, 12, 0, 100, 0, 0, 0], (12, 80, 120, 60), 1, (0, 16, 26, 30), ("P_LD_PIT", 1, "P_LRATE", 89, "P_LFADE", 40)),
-    "SCRCH": ("SCRATCH", [0, 0, 0, 0, 127, 0, 8, 0], (0, 127, 127, 18), 0, (0, 0, 0, 0), ()),
-    "PERC": ("GM KIT", [0, 0, 0, 0, 127, 0, 0, 0], (0, 127, 127, 60), 0, (0, 0, 0, 6), ()),
+    "PIANO": ("NIN.DISC PIANO", [0, 0, 0, 0, 127, 0, 0, 0], (0, 110, 0, 58), 0, (0, 6, 8, 24), ()),
+    "BASS": ("NIN.ECHO BASS", [0, 0, 0, 0, 118, 0, 12, 0], (0, 127, 127, 26), 1, (0, 0, 0, 4), ()),
+    "VIBES": ("NIN.DISC MRMBA", [0, 0, 0, 0, 127, 0, 0, 0], (0, 127, 127, 72), 0, (0, 24, 22, 30), ("P_LD_AMP", 18, "P_LRATE", 86)),
+    "HORNS": ("NIN.LETU STAB", [0, 0, 0, 0, 120, 0, 20, 0], (0, 127, 127, 22), 0, (8, 0, 14, 18), ()),
+    "STRGS": ("NIN.DEMN STRGS", [0, 0, 0, 0, 122, 0, 10, 0], (0, 127, 127, 26), 0, (0, 10, 12, 24), ()),
+    "FLUTE": ("NIN.CORO DRONE", [0, 0, 12, 0, 100, 0, 0, 0], (12, 80, 120, 60), 1, (0, 16, 26, 30), ("P_LD_PIT", 1, "P_LRATE", 89, "P_LFADE", 40)),
+    "SCRCH": ("NIN.HLAH BASS", [0, 0, 0, 0, 118, 0, 12, 0], (0, 127, 127, 26), 1, (0, 0, 0, 4), ()),
+    "PERC": ("NIN.HLAH KIT", [0, 0, 0, 0, 127, 0, 0, 0], (0, 127, 127, 60), 0, (0, 0, 0, 6), ()),
 }
-# more presets on a set: (set, name, E[], env, mono, sends, more)
+# more presets on a set: (set, name, E[], env, mono, sends, more). NIN-VAVE: each NIN sound twice more, treated by the
+# SAMPLE engine itself (TUNE, BITS, CUT, DRV, the envelope, the sends): the same NIN audio, bent
 EXTRA_PRESETS = [
-    ("PIANO", "DUSTY PNO", [0, 0, 34, 0, 96, 0, 24, 0], (0, 98, 0, 52), 0, (0, 8, 10, 22), ()),
-    ("PIANO", "LOFI KEYS", [0, 0, 45, 0, 78, 0, 30, 0], (0, 108, 0, 60), 0, (0, 30, 18, 34), ("P_LD_PIT", 1, "P_LRATE", 38)),
-    ("BASS", "DEEP BASS", [0, -12, 0, 0, 90, 0, 40, 0], (0, 127, 127, 30), 1, (0, 0, 0, 0), ()),
+    ("PIANO", "NIN.PIANO RUST", [0, 0, 40, 0, 92, 0, 30, 0], (0, 100, 0, 50), 0, (10, 0, 12, 20), ()),
+    ("PIANO", "NIN.PIANO DARK", [0, -12, 0, 0, 56, 0, 0, 0], (0, 120, 40, 90), 0, (0, 14, 30, 70), ()),
+    ("BASS", "NIN.ECHO SUB", [0, -12, 0, 0, 80, 0, 20, 0], (0, 127, 127, 30), 1, (0, 0, 0, 0), ()),
+    ("BASS", "NIN.ECHO FUZZ", [0, 0, 20, 0, 110, 0, 80, 0], (0, 127, 127, 26), 1, (40, 0, 0, 6), ()),
+    ("VIBES", "NIN.MRMBA CRUSH", [0, 0, 56, 0, 120, 0, 20, 0], (0, 110, 60, 50), 0, (0, 0, 20, 20), ()),
+    ("VIBES", "NIN.MRMBA ECHO", [0, -12, 0, 0, 100, 0, 0, 0], (0, 127, 127, 60), 0, (0, 20, 70, 40), ()),
+    ("HORNS", "NIN.STAB DIRT", [0, 0, 24, 0, 110, 0, 70, 0], (0, 127, 127, 22), 0, (40, 0, 10, 14), ()),
+    ("HORNS", "NIN.STAB OCT", [0, -12, 0, 0, 100, 0, 20, 0], (0, 127, 127, 30), 0, (8, 10, 20, 24), ()),
+    ("STRGS", "NIN.STRGS SLOW", [0, 0, 0, 0, 100, 0, 0, 0], (40, 110, 110, 90), 0, (0, 20, 20, 70), ()),
+    ("STRGS", "NIN.STRGS BURN", [0, 0, 36, 0, 110, 0, 60, 0], (0, 127, 127, 40), 0, (30, 0, 14, 30), ()),
+    ("FLUTE", "NIN.DRONE DARK", [0, -12, 12, 0, 50, 0, 0, 0], (24, 100, 120, 90), 1, (0, 20, 30, 80), ()),
+    ("FLUTE", "NIN.DRONE GRIT", [0, 0, 44, 0, 100, 0, 50, 0], (12, 80, 120, 60), 1, (30, 10, 20, 40), ()),
+    ("SCRCH", "NIN.HLAH FUZZ", [0, 0, 20, 0, 110, 0, 90, 0], (0, 127, 127, 26), 1, (50, 0, 0, 4), ()),
+    ("SCRCH", "NIN.HLAH SUB", [0, -12, 0, 0, 84, 0, 16, 0], (0, 127, 127, 30), 1, (0, 0, 0, 0), ()),
 ]
 
 KIT_BASE = 53                     # F3, the lowest FM-1 key
@@ -301,6 +320,7 @@ def break_loop():
 class Builder:
     def __init__(self):
         self.zones, self.sets, self.blob, self.kinds = [], [], bytearray(), {}
+        self.nin_sets = []
         self.brk = None
 
     def slice_break(self):
@@ -350,6 +370,27 @@ class Builder:
         self.sets.append(("PERC", z0, len(self.zones) - z0))
         self.kinds["PERC"] = "kit"
 
+    def nin_kit(self, tag, name):
+        """NIN-VAVE: a song's kit (assets/nin-kits/<tag>, tools/nin_kits.py), GM-mapped as PERC: each sound at its own
+        rate over the zones kit.json gives it. The WAVs keep the kit's balance: full scale = 30000"""
+        kit = json.loads((NIN / tag / "kit.json").read_text())
+        z0 = len(self.zones)
+        for snd in kit["sounds"]:
+            sr, x = wav(NIN / tag / snd["file"])
+            x = x[max(0, onset(x) - 16):]           # (as gm_kit_entry: the hit on time, not after the cut's lead-in)
+            full = 32768.0 if max((abs(v) for v in x), default=0) > 1.5 else 1.0
+            rate = snd["rate"]
+            smp = [int(v * 30000 / full) for v in resample(x, sr, rate)]
+            off, st = self.add(smp, len(smp))
+            for lo, hi, root in snd["zones"]:
+                self.zones.append(dict(off=off, n=len(smp), ls=len(smp), le=len(smp), looped=False, sr=rate,
+                                       root16=root * 16, pred=st[0], idx=st[1], lo=lo, hi=hi))
+        if name == "PERC":                          # the GM kit: a SAMPLE set (GM KIT) as before
+            self.sets.append((name, z0, len(self.zones) - z0))
+            self.kinds[name] = "kit"
+        else:                                       # a drum kit only: NIN_SETS (SAMPLE's SET numbers, USR1.. after
+            self.nin_sets.append((name, z0, len(self.zones) - z0))   # the sets, stay as they were)
+
     def cc0_set(self, name, kind):
         entries = []
         for k, (_, s, loop, root) in enumerate(cc0_entries(name, kind)):
@@ -385,6 +426,12 @@ class Builder:
             L.append('    {"NONE", 0, 1},')
         L.append("};")
         L.append(f"#define SMP_NSETS {max(1, len(sets))}")
+        L.append("/* NIN-VAVE: the songs' drum kits (drums.c NIN_KIT_SETS), zones in SMP_ZONES */")
+        L.append("static const smp_set_t NIN_SETS[] = {")
+        for name, z0, nz in self.nin_sets or [("NONE", 0, 0)]:
+            L.append(f'    {{"{name}", {z0}, {nz}}},')
+        L.append("};")
+        L.append(f"#define NIN_NSETS {len(self.nin_sets)}")
         L.append("static const preset_t SMP_PRESET_TABLE[] = {")
         named = sets or [("NONE", 0, 0)]
 
@@ -443,6 +490,7 @@ def input_key(have_cc0):
     files = sorted(GENDIR.glob("*.wav"))
     if have_cc0:
         files += sorted(CC0.glob("*/*.wav"))
+    files += sorted(NIN.glob("*/*.wav")) + sorted(NIN.glob("*/kit.json"))
     for p in files:
         h.update(str(p.relative_to(SRC)).encode() + b"\0")
         h.update(hashlib.sha256(p.read_bytes()).digest())
@@ -468,7 +516,13 @@ def main(out):
         for name, kind in CC0_SETS:
             if kind != "kit":                       # the CC0 KIT feeds the GM kit
                 b.cc0_set(name, kind)
-    b.gm_kit(have_cc0)
+    if (NIN / NIN_GM_KIT / "kit.json").exists():    # NIN-VAVE: Head Like a Hole is the GM kit (PERC)
+        b.nin_kit(NIN_GM_KIT, "PERC")
+    else:
+        b.gm_kit(have_cc0)
+    for tag in NIN_KITS:                            # then the other songs' kits (drums.c NIN_KIT_SETS, same order)
+        if (NIN / tag / "kit.json").exists():
+            b.nin_kit(tag, tag)
     if os.environ.get("FELUCCA_SLICE") == "1":       # SLICE's BREAK: only when that engine is built
         b.slice_break()                             # last: the sets' offsets stay as they were
     text = b.header()

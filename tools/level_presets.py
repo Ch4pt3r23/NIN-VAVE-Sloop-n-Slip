@@ -24,7 +24,7 @@ SEG = (FS * 9 // 2) // CTL * CTL + (FS // 4) // CTL * CTL
 OUT = Path(__file__).resolve().parent.parent / "firmware/src/preset_trim.h"
 TARGET = -15.0                                 # LUFS (integrated), at the default LEVEL
 ROLE = {0: 0.0, 1: -1.0, 2: 0.0, 3: 0.0, 4: 0.0}   # bass, chords held (pads, organs), comping, melody, one-key chords
-SKIP = {"GM KIT"}                              # (the drum map on a synth track: as it is)
+SKIP = {"NIN.HLAH KIT"}                              # (the drum map on a synth track: as it is)
 
 
 def lufs(x):

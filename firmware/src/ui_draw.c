@@ -464,7 +464,7 @@ UI_SMALL static void graph_browse(void)
         return;
     for (row = -3; row <= 3; row++) {
         int32_t y = 4 + (row + 3) * 17;
-        char tag[5], nm[13];
+        char tag[5], nm[20];                             /* (NIN-VAVE: NIN.MRMBA CRUSH, 15) */
         int sel = row == 0;
         uint32_t n = (cur + total * 4u + (uint32_t)row) % total;
         e = preset_at(n, &k);
@@ -551,6 +551,11 @@ UI_SMALL static uint32_t trk_level(uint32_t c)                /* LEVEL 0..127 (t
     return (uint32_t)(c == TRK_DRUM ? song.g[G_DRLVL] : trk[c].p[P_LEVEL]) & 127u;
 }
 
+/* NIN-VAVE: NIN.<name> as <name> where room is short (the tracks, the status line): everything there is NIN anyway */
+UI_SMALL static const char *nin_short(const char *nm)
+{
+    return nm + (nm[0] == 'N' && nm[1] == 'I' && nm[2] == 'N' && nm[3] == '.' ? 4 : 0);
+}
 UI_SMALL static void trk_short_name(uint32_t c, char *b)      /* the track's sound, b holds 13 */
 {
     const track_t *t = &trk[c];
@@ -560,7 +565,7 @@ UI_SMALL static void trk_short_name(uint32_t c, char *b)      /* the track's sou
     else if (user_of(t) < UP_SLOTS)
         up_name(user_of(t), b);
     else if (e->npresets)
-        str_cpy(b, e->presets[t->preset % e->npresets].name, 13);
+        str_cpy(b, nin_short(e->presets[t->preset % e->npresets].name), 13);
     else
         str_cpy(b, e->name, 13);
 }
@@ -850,7 +855,7 @@ UI_SMALL static void draw_foot(void)
     else if (user_of(t) < UP_SLOTS)
         up_name(user_of(t), pn);                       /* a user preset */
     else if (e->npresets)
-        str_cpy(pn, e->presets[TSEL->preset % e->npresets].name, sizeof pn);
+        str_cpy(pn, nin_short(e->presets[TSEL->preset % e->npresets].name), sizeof pn);
     if (ui.home) {
         str_cpy(ti, "HOME", sizeof ti);
     } else {                                           /* page title + number in its family: "ENV DEST 2/2" */
