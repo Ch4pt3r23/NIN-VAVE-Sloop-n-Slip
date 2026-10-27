@@ -1,4 +1,4 @@
-# NIN-VAVE: Sloop n' Slip
+# NIN-VAVE: Slip n' Sloop
 
 **[SLOOP](https://github.com/isod89/sloop-fm1), the live groovebox firmware for the M-VAVE FM-1, turned into a Nine
 Inch Nails instrument: 14 NIN drum kits, 22 NIN sounds, 33 factory patterns cut from the songs themselves, and NIN
@@ -13,7 +13,7 @@ only a few of SLOOP's own sounds on the knobs: the 808, 909 and acid, and some 9
 
 ## It boots as NIN-VAVE
 
-- The boot screen says **NIN-VAVE / SLOOP N' SLIP**.
+- The boot screen says **NIN-VAVE / SLIP N' SLOOP**. (Its site: <https://nin.chapter23.uk>.)
 - **The first power-on** (coming from SLOOP, an older NIN-VAVE, or a fresh FM-1) loads **HLAH A**: the Head Like a
   Hole kit and drums, its bass line on track 1 (NIN.HLAH BASS), **NIN.LETU STAB** on track 2 and **NIN.DISC PIANO**
   on track 3, empty to play over, at 115 BPM. Press **PLAY**. After that it resumes what you left, as SLOOP does.

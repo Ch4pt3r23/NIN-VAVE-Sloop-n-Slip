@@ -188,7 +188,7 @@ NIN_RED = (224, 32, 32)
 
 def nin_splash():
     """NIN-VAVE's boot splash: the name in Terminus Bold (the UI's font, assets/fonts), blown up to hard pixels, a red
-    bar, SLOOP N' SLIP under it. Plain type: nothing of the band's own logo"""
+    bar, SLIP N' SLOOP under it. Plain type: nothing of the band's own logo"""
     import tempfile
     from PIL import BdfFontFile, ImageFont
     root = Path(__file__).resolve().parents[1]
@@ -200,7 +200,7 @@ def nin_splash():
             im = Image.new("RGB", (8 * len(text), 16), BLACK)
             ImageDraw.Draw(im).text((0, 0), text, font=font, fill=col)
             return im.resize((im.width * scale, im.height * scale), Image.NEAREST)
-        big, small = word("NIN-VAVE", 3, WHITE), word("SLOOP N' SLIP", 2, NIN_RED)
+        big, small = word("NIN-VAVE", 3, WHITE), word("SLIP N' SLOOP", 2, NIN_RED)
     im = Image.new("RGB", (SPLASH_W, SPLASH_H), BLACK)
     im.paste(big, ((SPLASH_W - big.width) // 2, 34))
     ImageDraw.Draw(im).rectangle(((SPLASH_W - 196) // 2, 96, (SPLASH_W + 196) // 2 - 1, 101), fill=NIN_RED)
