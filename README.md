@@ -89,6 +89,23 @@ python3 tools/nin_pack.py load TDS             # FM-1 on USB: USR1..USR4 <- the 
 Then: drum track, PRESETS to **USR1** or **USR2** for the kits; a synth track on the SAMPLE engine, **SET USR3** or
 **USR4** for the instruments (SAVE > USER stores the sound as a user preset).
 
+## nin.chapter23.uk: install from the browser
+
+**[nin.chapter23.uk](https://nin.chapter23.uk)** installs everything from Chrome or Edge, no terminal: **Install the
+firmware** (SLOOP's own installer, for this package), and each NIN pack with a button (tick the slots to write). The
+pack installer (`web/nin_packs.js`) sends what `tools/fm1_sample_upload.py` sends, frame for frame
+(`web/test_nin_packs.mjs` checks every slot of every pack).
+
+Publish a new firmware or new packs (after `./build.sh` and `tools/nin_pack.py build`):
+
+```sh
+tools/deploy_nin_site.sh 1.2                       # build/site from build/nin-vave.fwsc + build/nin/packs/*, test, deploy
+tools/deploy_nin_site.sh 1.2 --dry-run             # everything but the upload
+```
+
+The site is static (`tools/make_nin_site.py`), served by Cloudflare (`site/wrangler.jsonc`: the Worker `nin-vave`, the
+custom domain nin.chapter23.uk); `npx wrangler login` once on the machine that deploys.
+
 ## Load a NIN pattern and jam
 
 1. Hold **HOME** (0.7 s): the menu opens.

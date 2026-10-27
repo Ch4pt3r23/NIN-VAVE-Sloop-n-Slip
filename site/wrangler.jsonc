@@ -1,0 +1,16 @@
+// NIN-VAVE's site, nin.chapter23.uk: static files only (tools/make_nin_site.py -> build/site), served by Cloudflare.
+// Deploy: tools/deploy_nin_site.sh (builds the site, checks it, then wrangler deploy with this file).
+{
+  "$schema": "https://unpkg.com/wrangler@4.153.0/config-schema.json",
+  "name": "nin-vave",
+  "compatibility_date": "2026-10-27",
+  "assets": {
+    "directory": "../build/site",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  },
+  "routes": [
+    { "pattern": "nin.chapter23.uk", "custom_domain": true }
+  ],
+  "workers_dev": false
+}

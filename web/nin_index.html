@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NIN-VAVE</title>
+<meta name="description" content="NIN-VAVE: Nine Inch Nails groovebox firmware and NIN sample packs for the M-VAVE FM-1, installed from the browser.">
+<link rel="icon" href="webapp/icon-192.png">
+<style>
+  :root { --bg: #000; --fg: #f2f2f2; --dim: #8a8a8a; --line: #2a2a2a; --red: #e02020; --card: #0d0d0d; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1, h2, h3, .mono, button { font-family: "Courier New", ui-monospace, monospace; letter-spacing: .04em; }
+  header img { width: 100%; max-width: 420px; height: auto; display: block; margin: 8px auto 4px; }
+  header p { text-align: center; color: var(--dim); margin: 0 0 24px; }
+  h2 { font-size: 1.25rem; border-bottom: 2px solid var(--red); padding-bottom: 6px; margin: 40px 0 12px; }
+  h3 { font-size: 1.05rem; margin: 0 0 8px; }
+  a { color: var(--fg); }
+  .card { background: var(--card); border: 1px solid var(--line); padding: 16px; margin: 12px 0; }
+  .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
+  button, .button { background: var(--red); color: #fff; border: 0; padding: 12px 18px; font-size: 1rem; font-weight: 700;
+    cursor: pointer; text-decoration: none; display: inline-block; }
+  button.ghost { background: transparent; border: 1px solid var(--fg); color: var(--fg); }
+  button:disabled { background: #333; color: #777; cursor: default; border-color: #333; }
+  .dim { color: var(--dim); }
+  .small { font-size: .875rem; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0 12px; font-size: .9rem; }
+  td { padding: 6px 4px; border-top: 1px solid var(--line); vertical-align: top; }
+  td.slot { white-space: nowrap; width: 1%; }
+  td.name { font-family: "Courier New", ui-monospace, monospace; font-weight: 700; }
+  progress { width: 100%; height: 10px; accent-color: var(--red); }
+  .status { min-height: 1.5em; margin: 8px 0 0; }
+  .err { color: #ff6b6b; }
+  .ok { color: #7bd88f; }
+  .warn { border-left: 3px solid var(--red); padding-left: 10px; }
+  ol { padding-left: 1.2em; }
+  footer { margin-top: 48px; color: var(--dim); font-size: .8rem; border-top: 1px solid var(--line); padding-top: 12px; }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <img src="nin-vave-logo.svg" alt="NIN-VAVE: Sloop n' Slip">
+  <p>Nine Inch Nails on the M-VAVE FM-1: the firmware, and NIN sample packs, installed from this page.</p>
+</header>
+
+<div class="card warn small" id="compat">
+  Use <b>Chrome</b> or <b>Edge</b> on a computer (or Chrome on Android), connect the FM-1 by <b>USB</b> and switch it on.
+  The browser asks to let this page use MIDI devices: allow it.
+</div>
+
+<h2>1. The firmware</h2>
+<div class="card">
+  <div class="row">
+    <div>
+      <h3 id="fw-title">NIN-VAVE</h3>
+      <div class="dim small" id="fw-info">&nbsp;</div>
+    </div>
+    <a class="button" href="webapp/installer/">Install the firmware &rarr;</a>
+  </div>
+  <p class="small dim">The installer checks the package, writes it and restarts the FM-1. It boots as NIN-VAVE:
+    the first power-on loads the Head Like a Hole pattern; press PLAY. Your projects and settings are kept. To go
+    back to M-VAVE's official firmware: M-VAVE's own updater, M-UPGRADE
+    (<a href="https://www.m-vave.com/download">m-vave.com/download</a>).</p>
+</div>
+
+<h2>2. NIN packs</h2>
+<p class="small">The FM-1 keeps four user sample slots, <b>USR1 to USR4</b>, besides the firmware. A pack fills them
+  with more Nine Inch Nails: full 16-pad drum kits, and NIN instruments sampled over several notes. Install one,
+  play it, install another whenever you like.</p>
+<div class="card">
+  <div class="row">
+    <div><b>FM-1</b> <span class="small dim" id="dev">not connected</span></div>
+    <button id="connect" class="ghost">Connect the FM-1</button>
+  </div>
+  <div class="small dim" id="slots"></div>
+</div>
+<div id="packs"><p class="dim small">Loading the packs&hellip;</p></div>
+
+<h2>Where to find a pack on the FM-1</h2>
+<ol class="small">
+  <li><b>Drum kits:</b> the drum track (ALGORITHM to track 4), turn <b>PRESETS</b> to the slot the kit went to:
+    <span class="mono">USR1</span> to <span class="mono">USR4</span> (newer firmware shows them by the pack's names,
+    with the other NIN kits).</li>
+  <li><b>Instruments:</b> a synth track on the <b>SAMPLE</b> engine, <b>SET</b> to the slot:
+    <span class="mono">USR1</span> to <span class="mono">USR4</span> (newer firmware also lists them on PRESETS as
+    <span class="mono">NIN.SLOT1</span> to <span class="mono">NIN.SLOT4</span>).</li>
+  <li>Hold <b>HOME</b> &rarr; SEQ &rarr; <b>NIN PATTERN</b> for the factory patterns; hold <b>FX</b> to bend
+    everything.</li>
+</ol>
+
+<footer>
+  NIN-VAVE is <a href="https://github.com/isod89/sloop-fm1">SLOOP</a> (isod89), itself based on
+  <a href="https://github.com/hugelton/Felucca">Felucca</a> (Leo Kuroshita, H&uuml;gelton Instruments), with Nine Inch
+  Nails inside: free software, GPL-3.0, <a href="https://github.com/Ch4pt3r23/NIN-VAVE-Sloop-n-Slip">source</a>.
+  The sounds are excerpts of Nine Inch Nails multitracks and stay theirs:
+  <a href="https://github.com/Ch4pt3r23/NIN-VAVE-Sloop-n-Slip/blob/main/SOURCES.md">where each comes from</a>.
+  Not affiliated with Nine Inch Nails, M-VAVE or SLOOP. M-VAVE and FM-1 are trademarks of their owners.
+  Installing firmware is at your own risk: if the FM-1 will not start, hold OCT&minus; while switching it on (USB
+  rescue) and install again.
+</footer>
+</main>
+
+<script type="module">
+import { Link } from "./nin_packs.js";
+
+const $ = (id) => document.getElementById(id);
+let link = null, index = null, busy = false;
+
+if (!navigator.requestMIDIAccess) {
+  $("compat").innerHTML = "<b>This browser cannot talk to the FM-1</b> (no Web MIDI). Open this page in <b>Chrome</b> or " +
+    "<b>Edge</b> on a computer, or Chrome on Android.";
+}
+
+function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]); }
+
+function render() {
+  const fw = index.firmware;
+  $("fw-title").textContent = `NIN-VAVE ${fw.version}`;
+  $("fw-info").textContent = `${fw.product} · ${(fw.bytes / 1024).toFixed(0)} KB · built ${fw.built}`;
+  $("packs").innerHTML = index.packs.map((p) => `
+    <div class="card" data-pack="${esc(p.id)}">
+      <h3>${esc(p.title)} <span class="dim small">${esc(p.id)}</span></h3>
+      ${p.about ? `<p class="small dim">${esc(p.about)}</p>` : ""}
+      <table>${p.slots.map((s) => `
+        <tr><td class="slot"><label><input type="checkbox" checked data-slot="${s.slot}"> USR${s.slot}</label></td>
+          <td class="name">${esc(s.name)}</td>
+          <td class="dim">${s.kind === "kit" ? `drum kit, ${s.zones} pads` : `instrument, ${s.zones} note${s.zones > 1 ? "s" : ""}`}, ${s.seconds} s</td></tr>`).join("")}
+      </table>
+      <div class="row">
+        <span class="small dim">Replaces what is in the ticked slots.</span>
+        <button class="install" disabled>Install this pack</button>
+      </div>
+      <progress max="1" value="0" hidden></progress>
+      <p class="status small"></p>
+    </div>`).join("") || `<p class="dim small">No packs yet.</p>`;
+  document.querySelectorAll("[data-pack] .install").forEach((b) => { b.onclick = () => install(b.closest("[data-pack]")); });
+  enable();
+}
+
+function enable() {
+  document.querySelectorAll("[data-pack] .install").forEach((b) => { b.disabled = !link || busy; });
+  $("connect").disabled = busy;
+}
+
+async function showSlots() {
+  try {
+    const s = await link.slots();
+    $("slots").textContent = "In the slots now: " +
+      s.map((x, k) => `USR${k + 1} ${x.nz ? x.name || "(unnamed)" : "empty"}`).join(" · ");
+  } catch (e) { $("slots").textContent = ""; }
+}
+
+$("connect").onclick = async () => {
+  $("dev").textContent = "connecting…";
+  try {
+    link = await Link.open();
+    if (!link) {
+      $("dev").innerHTML = '<span class="err">no FM-1 running NIN-VAVE found</span>: install the firmware first, ' +
+        "connect it by USB, and close other pages or apps using it (the editor in another tab).";
+    } else {
+      $("dev").innerHTML = `<span class="ok">connected</span> (${esc(link.input.name)})`;
+      $("connect").textContent = "Reconnect";
+      await showSlots();
+    }
+  } catch (e) {
+    link = null;
+    $("dev").innerHTML = `<span class="err">${esc(e.message)}</span>`;
+  }
+  enable();
+};
+
+async function install(card) {
+  const p = index.packs.find((x) => x.id === card.dataset.pack);
+  const slots = p.slots.filter((s) => card.querySelector(`[data-slot="${s.slot}"]`).checked);
+  const bar = card.querySelector("progress"), st = card.querySelector(".status");
+  if (!slots.length) { st.textContent = "Tick at least one slot."; return; }
+  busy = true; enable();
+  bar.hidden = false; bar.value = 0;
+  try {
+    const total = slots.reduce((n, s) => n + s.bytes, 0);
+    let done = 0;
+    for (const s of slots) {
+      st.textContent = `Downloading USR${s.slot} ${s.name}…`;
+      const get = async (u) => { const r = await fetch(u, { cache: "no-cache" }); if (!r.ok) throw new Error(`${u}: ${r.status}`); return new Uint8Array(await r.arrayBuffer()); };
+      const hdr = await get(s.hdr), data = await get(s.bin);
+      st.textContent = `Writing USR${s.slot} ${s.name}… (keep the FM-1 connected)`;
+      await link.writeSlot(s.slot - 1, hdr, data, (d, t) => { bar.value = (done + s.bytes * d / t) / total; });
+      done += s.bytes;
+    }
+    bar.value = 1;
+    st.innerHTML = `<span class="ok">Installed: ${slots.map((s) => `USR${s.slot} ${esc(s.name)}`).join(", ")}.</span> ` +
+      "Find the kits on the drum track's PRESETS (USR1..USR4), the instruments on a SAMPLE track's SET.";
+    await showSlots();
+  } catch (e) {
+    st.innerHTML = `<span class="err">${esc(e.message)}</span> Check the cable and try again: a slot cut off halfway ` +
+      "is simply empty until it is written again.";
+  }
+  busy = false; enable();
+}
+
+fetch("packs/index.json", { cache: "no-cache" }).then((r) => r.json()).then((j) => { index = j; render(); })
+  .catch(() => { $("packs").innerHTML = '<p class="err small">Could not load the packs list.</p>'; });
+</script>
+</body>
+</html>
