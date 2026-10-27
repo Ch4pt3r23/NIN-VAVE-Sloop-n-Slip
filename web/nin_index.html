@@ -110,12 +110,15 @@
 
 <h2>Where to find a pack on the FM-1</h2>
 <ol class="small">
-  <li><b>Drum kits:</b> the drum track (ALGORITHM to track 4), turn <b>PRESETS</b> to the slot the kit went to:
-    <span class="mono">USR1</span> to <span class="mono">USR4</span> (newer firmware shows them by the pack's names,
-    with the other NIN kits).</li>
-  <li><b>Instruments:</b> a synth track on the <b>SAMPLE</b> engine, <b>SET</b> to the slot:
-    <span class="mono">USR1</span> to <span class="mono">USR4</span> (newer firmware also lists them on PRESETS as
-    <span class="mono">NIN.SLOT1</span> to <span class="mono">NIN.SLOT4</span>).</li>
+  <li><b>Drum kits:</b> the drum track (ALGORITHM to track 4), turn <b>PRESETS</b>: a pack's kits show by their
+    own names (<span class="mono">NIN.WISH</span>, <span class="mono">NIN.GHK1</span> &hellip;) right after the
+    built-in NIN kits.</li>
+  <li><b>Instruments:</b> a synth track, turn <b>PRESETS</b>: the NIN group ends with
+    <span class="mono">NIN.SLOT1</span> to <span class="mono">NIN.SLOT4</span>, which play the four slots and show
+    the pack's names (<span class="mono">NIN.GHPN</span>, <span class="mono">NIN.HURT</span> &hellip;). The SAMPLE
+    engine's <b>SET</b> lists them by name too.</li>
+  <li class="dim">On NIN-VAVE 1.1 the slots show as <span class="mono">USR1</span> to <span class="mono">USR4</span>:
+    the drum track's PRESETS for kits, SAMPLE's SET for instruments. Install the firmware above for the names.</li>
   <li>Hold <b>HOME</b> &rarr; SEQ &rarr; <b>NIN PATTERN</b> for the factory patterns; hold <b>FX</b> to bend
     everything.</li>
 </ol>
@@ -126,6 +129,9 @@
   Nails inside: free software, GPL-3.0, <a href="https://github.com/Ch4pt3r23/NIN-VAVE-Sloop-n-Slip">source</a>.
   The sounds are excerpts of Nine Inch Nails multitracks and stay theirs:
   <a href="https://github.com/Ch4pt3r23/NIN-VAVE-Sloop-n-Slip/blob/main/SOURCES.md">where each comes from</a>.
+  The Ghosts packs are cut from the Ghosts I&ndash;IV Deluxe Edition multitracks, released by Nine Inch Nails under
+  <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/us/">Creative Commons BY-NC-SA 3.0</a>: shared here
+  under the same licence, non-commercially, credited to Nine Inch Nails.
   Not affiliated with Nine Inch Nails, M-VAVE or SLOOP. M-VAVE and FM-1 are trademarks of their owners.
   Installing firmware is at your own risk: if the FM-1 will not start, hold OCT&minus; while switching it on (USB
   rescue) and install again.
@@ -153,6 +159,7 @@ function render() {
     <div class="card" data-pack="${esc(p.id)}">
       <h3>${esc(p.title)} <span class="dim small">${esc(p.id)}</span></h3>
       ${p.about ? `<p class="small dim">${esc(p.about)}</p>` : ""}
+      ${p.licence ? `<p class="small dim">Licence: ${esc(p.licence)}</p>` : ""}
       <table>${p.slots.map((s) => `
         <tr><td class="slot"><label><input type="checkbox" checked data-slot="${s.slot}"> USR${s.slot}</label></td>
           <td class="name">${esc(s.name)}</td>

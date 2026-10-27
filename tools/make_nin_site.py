@@ -91,7 +91,10 @@ def main(fw, version, out, pack_dirs):
             slots.append(dict(slot=s["slot"], name=s["name"], kind=s["kind"], zones=s["zones"], seconds=s["seconds"],
                               hdr=f"packs/{p['pack']}/usr{s['slot']}.hdr", bin=f"packs/{p['pack']}/usr{s['slot']}.bin",
                               bytes=(src / "slot.bin").stat().st_size))
-        index["packs"].append(dict(id=p["pack"], title=p["title"], about=p.get("about", ""), slots=slots))
+        licence = p.get("licence") or ("Creative Commons BY-NC-SA 3.0 (Ghosts I-IV, Nine Inch Nails)"
+                                       if p["pack"].startswith("GHST") else "")
+        index["packs"].append(dict(id=p["pack"], title=p["title"], about=p.get("about", ""), licence=licence,
+                                   slots=slots))
         print(f"site: pack {p['pack']} ({p['title']}): " + ", ".join(f"USR{s['slot']} {s['name']}" for s in slots))
     (out / "packs/index.json").write_text(json.dumps(index, indent=1) + "\n")
     shutil.copy(ROOT / "web/nin_index.html", out / "index.html")
@@ -108,5 +111,8 @@ def main(fw, version, out, pack_dirs):
 if __name__ == "__main__":
     if len(sys.argv) < 4:
         sys.exit(__doc__)
-    dirs = sys.argv[4:] or sorted(str(p.parent) for p in (ROOT / "build/nin/packs").glob("*/pack.json"))
+    # the packs in the order of the records (then any other, by name)
+    ORDER = ["PHM", "BRKN", "TDS", "TDS2", "FRGL", "WTTH", "YZ", "GHST1", "GHST2", "SLIP", "HM", "BW"]
+    dirs = sys.argv[4:] or sorted((str(p.parent) for p in (ROOT / "build/nin/packs").glob("*/pack.json")),
+                                  key=lambda d: (ORDER.index(Path(d).name) if Path(d).name in ORDER else len(ORDER), d))
     main(sys.argv[1], sys.argv[2], sys.argv[3], dirs)
