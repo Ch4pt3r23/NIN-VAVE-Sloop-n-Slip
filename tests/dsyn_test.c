@@ -100,11 +100,15 @@ static uint32_t put(uint32_t k, uint32_t part, const uint8_t *d, uint32_t nd)
 /* one hit of note on the drum track, 1.5 s: its zero crossings in the first 500 ms, its energy after 250 ms over the
  * first 80 ms' */
 static uint32_t hit_win = 22050;                     /* the crossings' window: half a second (a sample: 80 ms) */
+/* NIN-VAVE: and its length (to 1 % of its peak): a sample tuned up ends sooner. A NIN kick is a click and a
+ * distorted body: its crossings hardly follow its pitch (+7: 120 -> 128), its length does */
+static uint32_t hit_len;
 static void hit_render(uint32_t note, double *zc, double *tail)
 {
     static int32_t L[66150], R[66150], RV[66150], DL[66150];
     uint32_t i, n = 66150, c = 0;
     double e0 = 0, e1 = 0;
+    int32_t pk = 0;
     memset(&drums, 0, sizeof drums);
     drums.set = -2;
     memset(L, 0, sizeof L), memset(R, 0, sizeof R), memset(RV, 0, sizeof RV), memset(DL, 0, sizeof DL);
@@ -116,6 +120,8 @@ static void hit_render(uint32_t note, double *zc, double *tail)
         c += (L[i] >= 0) != (L[i - 1] >= 0);
     for (i = 0; i < 3528u; i++) e0 += (double)L[i] * L[i];
     for (i = 11025; i < n; i++) e1 += (double)L[i] * L[i];
+    for (i = 0; i < n; i++) if (L[i] > pk || -L[i] > pk) pk = L[i] < 0 ? -L[i] : L[i];
+    for (hit_len = 0, i = 0; i < n; i++) if (L[i] > pk / 100 || -L[i] > pk / 100) hit_len = i;
     if (zc) *zc = c;
     if (tail) *tail = e0 > 0 ? e1 / e0 : 0;
 }
@@ -126,9 +132,11 @@ int main(void)
     host_tracks_init();
     song.g[G_DRREV] = 0;
     song.g[G_BPM] = 120;
-    check(DRUM_SYN == DRUM_PAIR + 1u && DRUM_KITS == DRUM_SYN + 4u && !strcmp(DRUM_KIT_NAMES[DRUM_SYN], "SYN1") &&
-          !strcmp(DRUM_KIT_NAMES[DRUM_KITS - 1u], "SYN4") && !strcmp(DRUM_KIT_STYLES[DRUM_SYN], "YOUR SYNTH"),
-          "the kit list ends with SYN1..SYN4, after USR3+4 (older projects keep their kit)");
+    /* NIN-VAVE: the songs' kits come after SYN4 (SLOOP's kit numbers stay) */
+    check(DRUM_SYN == DRUM_PAIR + 1u && DRUM_NIN == DRUM_SYN + 4u && !strcmp(DRUM_KIT_NAMES[DRUM_SYN], "SYN1") &&
+          !strcmp(DRUM_KIT_NAMES[DRUM_NIN - 1u], "SYN4") && !strcmp(DRUM_KIT_STYLES[DRUM_SYN], "YOUR SYNTH") &&
+          DRUM_KITS == DRUM_NIN + NIN_NKITS && !strcmp(DRUM_KIT_NAMES[DRUM_NIN], "NIN.TLIE"),
+          "the kit list: SYN1..SYN4 after USR3+4, then the NIN kits (older projects keep their kit)");
     (void)dsu_kit(0);
     ok = 1;
     for (k = 0; k < DSU_N; k++)
@@ -260,23 +268,27 @@ int main(void)
     }
     {   /* 2.7, the DRUMS screen's SOUND page: a sound's TUNE and DECAY, on a synthesised kit (808), a sampled one
          * (ACOUSTIC) and SYN1; the editor's audition plays SYN1 as designed */
-        static const char *const KN[3] = {"808", "ACOUSTIC", "SYN1"};
+        static const char *const KN[3] = {"808", "NIN.HLAH", "SYN1"};   /* (NIN-VAVE: the GM kit is HLAH) */
         for (k = 0; k < 3u; k++) {
-            uint32_t kit = 0, kk;
+            uint32_t kit = 0, kk, n0, nu, nd, tuned;
             double z0, zu, zd, t0, ts, tl;
             for (kk = 0; kk < DRUM_KITS; kk++) if (!strcmp(DRUM_KIT_NAMES[kk], KN[k])) kit = kk;
             TDRUM->p[P_E0] = (int16_t)kit;
             hit_win = k == 1u ? 3528u : 22050u;
             memset(drum_tune, 0, sizeof drum_tune); memset(drum_dec, 0, sizeof drum_dec);
-            hit_render(36, &z0, &t0);                   /* the kick */
-            drum_tune[lane_of_note(36)] = 7; hit_render(36, &zu, 0);
-            drum_tune[lane_of_note(36)] = -8; hit_render(36, &zd, 0);
+            hit_render(36, &z0, &t0); n0 = hit_len;     /* the kick */
+            drum_tune[lane_of_note(36)] = 7; hit_render(36, &zu, 0); nu = hit_len;
+            drum_tune[lane_of_note(36)] = -8; hit_render(36, &zd, 0); nd = hit_len;
             drum_tune[lane_of_note(36)] = 0;
+            tuned = k == 1u ? n0 > nu * 1.2 && nd > n0 * 1.2      /* NIN-VAVE: a sample's TUNE by its length */
+                            : zu > z0 * 1.2 && zd < z0 * 0.85;
+            if (k == 1u)
+                printf("  %-8s kick: length %u / +7 %u / -8 %u samples\n", KN[k], n0, nu, nd);
             drum_dec[lane_of_note(36)] = -4; hit_render(36, 0, &ts);
             drum_dec[lane_of_note(36)] = 3; hit_render(36, 0, &tl);
             drum_dec[lane_of_note(36)] = 0;
             printf("  %-8s kick: crossings %.0f / +7 %.0f / -8 %.0f; tail %.4f / DECAY -4 %.4f / +3 %.4f\n", KN[k], z0, zu, zd, t0, ts, tl);
-            check(zu > z0 * 1.2 && zd < z0 * 0.85 && ts < t0 * 0.5 && (k == 1u ? tl >= t0 * 0.99 : tl > t0 * 1.3),
+            check(tuned && ts < t0 * 0.5 && (k == 1u ? tl >= t0 * 0.99 : tl > t0 * 1.3),
                   k == 1u ? "SOUND page, a sampled kit: TUNE up / down, DECAY -4 fades it (+3: as the sample is)"
                           : "SOUND page, a synthesised kit: TUNE up / down, DECAY -4 shorter, +3 longer");
             memset(drum_tune, 0, sizeof drum_tune);

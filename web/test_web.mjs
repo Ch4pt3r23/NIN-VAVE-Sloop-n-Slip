@@ -698,7 +698,9 @@ async function editorV5() {
   /* the kit: the drum track's P_E0 */
   await rq(E.req.track(3));
   const kit = E.parse[C.DESC](await rq(E.req.desc(0, info.pe0)));
-  const dk = (/DRUM_KIT_NAMES\[\] = \{([^}]*)\}/.exec(dc) || [])[1] || "";
+  /* (NIN-VAVE: USR1..USR4 are usr_label[k], a slot's own name, "USRn" when empty, as the editor lists them) */
+  const dk = ((/DRUM_KIT_NAMES\[\] = \{([^}]*)\}/.exec(dc.replace(/\/\*[\s\S]*?\*\//g, "")) || [])[1] || "")
+    .replace(/usr_label\[(\d)\]/g, (_, k) => `"USR${+k + 1}"`);
   const gen = join(HERE, "../build/gen/felucca_drumkits.h");
   const dsList = existsSync(gen) ? ((/#define DS_KIT_NAME_LIST (.*)/.exec(readFileSync(gen, "utf8")) || [])[1] || "") : null;
   const fwKits = dsList == null ? null : dk.replace("DS_KIT_NAME_LIST", dsList).split(",").map((x) => x.trim().replace(/"/g, ""));

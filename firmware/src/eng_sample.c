@@ -58,7 +58,22 @@ typedef struct {
 } smp_user_hdr_t;                                   /* 32 + 16 x 28 = 480 B, data at +512 */
 static smp_zone_t usr_zone[SMP_USER_SLOTS][16];     /* RAM copy, off rebased onto SMP_DATA */
 static uint8_t usr_nz[SMP_USER_SLOTS];
-static const char *const SMP_ALL_NAMES[SMP_NALL] = {SMP_SET_NAMES_INIT, "USR1", "USR2", "USR3", "USR4"};
+/* NIN-VAVE: a slot shows its own name (its header's: a NIN pack's NIN.WISH ..), USRn when empty or unnamed; the SET
+ * list and the drum track's KIT list (drums.c) read these */
+static char usr_label[SMP_USER_SLOTS][9] = {"USR1", "USR2", "USR3", "USR4"};
+static const char *const SMP_ALL_NAMES[SMP_NALL] = {SMP_SET_NAMES_INIT, usr_label[0], usr_label[1], usr_label[2],
+                                                    usr_label[3]};
+static void usr_label_set(uint32_t k, const char *name)   /* name: 8 bytes, 0 = USRn */
+{
+    uint32_t i, n = 0;
+    for (i = 0; name && i < 8u && name[i] > 32 && name[i] < 127; i++)
+        usr_label[k][n++] = name[i] >= 'a' && name[i] <= 'z' ? (char)(name[i] - 32) : name[i];
+    if (!n) {
+        usr_label[k][n++] = 'U', usr_label[k][n++] = 'S', usr_label[k][n++] = 'R';
+        usr_label[k][n++] = (char)('1' + k);
+    }
+    usr_label[k][n] = 0;
+}
 
 #ifndef SMP_USER_XIP                                /* host tests: a RAM image of the slots */
 #define SMP_USER_XIP(k) fm1_xip_ptr(SMP_USER_OFF((uint32_t)(k)))
@@ -86,6 +101,7 @@ static void smp_user_scan(uint32_t k)
     uint32_t i, base;
     smp_user_gen++;
     usr_nz[k] = 0;                                  /* (from here no new voice takes the slot) */
+    usr_label_set(k, 0);
     slc_user_scan(k, 0);
     if (h->magic != SMP_USER_MAGIC || h->version != 1 || !h->nz || h->nz > 16u ||
         h->data_len > SMP_USER_SIZE - SMP_USER_DATA)
@@ -102,6 +118,7 @@ static void smp_user_scan(uint32_t k)
         usr_zone[k][i] = zs[i];
     usr_nz[k] = h->nz;
     fm1_irq_on();
+    usr_label_set(k, h->name);
     slc_user_scan(k, 1);
 }
 

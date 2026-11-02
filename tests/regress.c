@@ -985,7 +985,7 @@ int main(int argc, char **argv)
             snprintf(why + strlen(why), sizeof why - strlen(why), " %u samples >= %d;", r->near, LIM_NEAR);
         if (fabs(r->dc) > LIM_DC)
             snprintf(why + strlen(why), sizeof why - strlen(why), " DC %.1f (limit %d);", r->dc, LIM_DC);
-        if (r->peak < LIM_PEAK_MIN)
+        if (r->peak < LIM_PEAK_MIN && !strstr(j->name, "NIN.SLOT"))   /* (NIN-VAVE: NIN.SLOTn plays a user slot: empty here) */
             snprintf(why + strlen(why), sizeof why - strlen(why), " peak %d (min %d);", r->peak, LIM_PEAK_MIN);
         if (r->free_s < 0)
             snprintf(why + strlen(why), sizeof why - strlen(why), " voices not free %d s after the note-offs;", FREE_CAP_S);
