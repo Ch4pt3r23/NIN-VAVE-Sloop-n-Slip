@@ -22,7 +22,7 @@
 # of tests/golden.txt, commit it with the change. After an intended change of the cost (or a new
 # compiler): BUDGET_UPDATE=1 (rewrites cpu_baseline.txt and target_budget.txt). VERBOSE=1: every render.
 set -e
-export AC79_SDK="${AC79_SDK:-$HOME/fw-AC79_AIoT_SDK}"
+export AC79_SDK="${AC79_SDK:-$HOME/code/fw-AC79_AIoT_SDK}"
 cd "$(dirname "$0")/.."
 OUT=build/host
 mkdir -p "$OUT"

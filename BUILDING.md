@@ -33,7 +33,7 @@ Set `SLOOP_WSL_DISTRO` (default `Ubuntu`) and `SLOOP_TOOLCHAIN` (a Linux path, d
 
   ```
   git clone --depth 1 --branch AC79NN_SDK_V1.2.1_2023-12-13 \
-      https://gitee.com/Jieli-Tech/fw-AC79_AIoT_SDK.git ~/fw-AC79_AIoT_SDK
+      https://gitee.com/Jieli-Tech/fw-AC79_AIoT_SDK.git ~/code/fw-AC79_AIoT_SDK
   ```
 
 - Node.js (optional, for the web tests).
@@ -47,7 +47,7 @@ On Linux x86-64 the toolchain runs natively and Docker is not needed.
 ```
 
 `JIELI_TOOLCHAIN` and `AC79_SDK` override the default locations
-(`~/.jieli/toolchain`, `~/fw-AC79_AIoT_SDK`).
+(`~/.jieli/toolchain`, `~/code/fw-AC79_AIoT_SDK`).
 
 `./build.sh --release 0.9-beta` makes a release build: the package identity becomes
 `FM-1_909` and the version string `0.9-BETA`; the package is `build/felucca-0.9-beta.fwsc`.
